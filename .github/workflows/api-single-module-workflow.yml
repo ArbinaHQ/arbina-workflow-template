@@ -19,6 +19,14 @@ on:
         description: "Using for disable pushing to ECR if value is true."
         required: true
         type: boolean
+      IS_COPY_DOCKERFILE:
+        description: "Using for copy default dockerfile."
+        required: true
+        type: boolean
+      IS_COPY_DOCKER_DIRECTORY:
+        description: "Using for copy default docker directory (entrypoint, cron, healthcheck)."
+        required: true
+        type: boolean
     secrets:
       SECRET_GITHUB_TOKEN:
         required: true
@@ -58,6 +66,14 @@ jobs:
         env:
           GITHUB_USERNAME: ${{ secrets.SECRET_GITHUB_USERNAME }}
           GITHUB_TOKEN: ${{ secrets.SECRET_GITHUB_TOKEN }}
+
+      - name: Copy docker directory
+        if: ${{ inputs.IS_COPY_DOCKER_DIRECTORY }}
+        run: cp -r /docker/api/docker ./
+
+      - name: Copy dockerfile
+        if: ${{ inputs.IS_COPY_DOCKERFILE }}
+        run: cp /docker/api/Dockerfile ./
 
       - name: Login to Amazon ECR
         if: ${{ inputs.ECR_PUSH_ENABLED }}
