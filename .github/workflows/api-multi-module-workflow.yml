@@ -59,7 +59,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Test application with Gradle
-        if: ${{ inputs.TEST_ENABLED }}
+        if: ${{ inputs.IS_TEST_ENABLED }}
         run: ./gradlew test -p ${{ inputs.MODULE_NAME }}
         env:
           GITHUB_USERNAME: ${{ secrets.SECRET_GITHUB_USERNAME }}
@@ -82,7 +82,7 @@ jobs:
         working-directory: ${{ inputs.MODULE_NAME }}
 
       - name: Login to Amazon ECR
-        if: ${{ inputs.ECR_PUSH_ENABLED }}
+        if: ${{ inputs.IS_ECR_PUSH_ENABLED }}
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
         env:
@@ -91,7 +91,7 @@ jobs:
           AWS_REGION: ${{ secrets.SECRET_AWS_REGION }}
 
       - name: Build, tag, and push image to Amazon ECR
-        if: ${{ inputs.ECR_PUSH_ENABLED }}
+        if: ${{ inputs.IS_ECR_PUSH_ENABLED }}
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ inputs.ECR_REPOSITORY }}
@@ -105,5 +105,5 @@ jobs:
         working-directory: ${{ inputs.MODULE_NAME }}
 
       - name: Logout of Amazon ECR
-        if: always() && ${{ inputs.ECR_PUSH_ENABLED }}
+        if: always() && ${{ inputs.IS_ECR_PUSH_ENABLED }}
         run: docker logout ${{ steps.login-ecr.outputs.registry }}
