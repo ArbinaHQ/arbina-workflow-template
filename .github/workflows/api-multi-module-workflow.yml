@@ -1,0 +1,91 @@
+name: Reusable workflow. Using to build, test and push multi module API
+
+on:
+  workflow_call:
+    inputs:
+      MODULE_NAME:
+        description: "Using for choice specified module when build application."
+        required: true
+        type: string
+      ECR_REPOSITORY:
+        description: "Using for deploy docker image to ECR"
+        required: true
+        type: string
+      BOOT_JAR_NAME:
+        description: "Using for start docker container."
+        required: true
+        type: string
+      TEST_ENABLED:
+        description: "Using for start test before pushing to ECR if value is true."
+        required: true
+        type: boolean
+      ECR_PUSH_ENABLED:
+        description: "Using for disable pushing to ECR if value is true."
+        required: true
+        type: boolean
+    secrets:
+      SECRET_GITHUB_TOKEN:
+        required: true
+      SECRET_GITHUB_USERNAME:
+        required: true
+      SECRET_AWS_ACCESS_KEY_ID:
+        required: true
+      SECRET_AWS_SECRET_ACCESS_KEY:
+        required: true
+      SECRET_AWS_REGION:
+        required: true
+      SECRET_IMAGE_TAG:
+        required: true
+
+jobs:
+  api-multi-module-workflow:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 17
+        uses: actions/setup-java@v1
+        with:
+          java-version: 17
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Test application with Gradle
+        if: ${{ inputs.TEST_ENABLED }}
+        run: ./gradlew test -p ${{ inputs.MODULE_NAME }}
+        env:
+          GITHUB_USERNAME: ${{ secrets.SECRET_GITHUB_USERNAME }}
+          GITHUB_TOKEN: ${{ secrets.SECRET_GITHUB_TOKEN }}
+
+      - name: Build application with Gradle
+        run: ./gradlew clean build bootJar -p ${{ inputs.MODULE_NAME }}
+        env:
+          GITHUB_USERNAME: ${{ secrets.SECRET_GITHUB_USERNAME }}
+          GITHUB_TOKEN: ${{ secrets.SECRET_GITHUB_TOKEN }}
+
+      - name: Login to Amazon ECR
+        if: ${{ inputs.ECR_PUSH_ENABLED }}
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.SECRET_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.SECRET_AWS_REGION }}
+
+      - name: Build, tag, and push image to Amazon ECR
+        if: ${{ inputs.ECR_PUSH_ENABLED }}
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ inputs.ECR_REPOSITORY }}
+          IMAGE_TAG: ${{ secrets.SECRET_IMAGE_TAG }}
+          BOOT_JAR_NAME: ${{ inputs.BOOT_JAR_NAME }}
+        run: |
+          docker build --build-arg=IMAGE_TAG=$IMAGE_TAG --build-arg=BOOT_JAR_NAME=$BOOT_JAR_NAME -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker build --build-arg=IMAGE_TAG=$IMAGE_TAG --build-arg=BOOT_JAR_NAME=$BOOT_JAR_NAME -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        working-directory: ${{ inputs.MODULE_NAME }}
+
+      - name: Logout of Amazon ECR
+        if: always() && ${{ inputs.ECR_PUSH_ENABLED }}
+        run: docker logout ${{ steps.login-ecr.outputs.registry }}
