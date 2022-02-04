@@ -15,11 +15,11 @@ on:
         description: "Using for start docker container."
         required: true
         type: string
-      TEST_ENABLED:
+      IS_TEST_ENABLED:
         description: "Using for start test before pushing to ECR if value is true."
         required: true
         type: boolean
-      ECR_PUSH_ENABLED:
+      IS_ECR_PUSH_ENABLED:
         description: "Using for disable pushing to ECR if value is true."
         required: true
         type: boolean
