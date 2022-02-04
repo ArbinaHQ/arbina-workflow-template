@@ -39,7 +39,7 @@ on:
 
 jobs:
   api-multi-module-workflow:
-    runs-on: self-hosted
+    runs-on: [self-hosted, custom]
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK 17
