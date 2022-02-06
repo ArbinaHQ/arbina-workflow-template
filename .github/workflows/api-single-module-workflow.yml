@@ -62,7 +62,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.SECRET_GITHUB_TOKEN }}
 
       - name: Build application with Gradle
-        run: ./gradlew clean build bootJar
+        run: ./gradlew bootJar
         env:
           GITHUB_USERNAME: ${{ secrets.SECRET_GITHUB_USERNAME }}
           GITHUB_TOKEN: ${{ secrets.SECRET_GITHUB_TOKEN }}
