@@ -12,7 +12,7 @@ on:
         required: true
         type: boolean
     secrets:
-      GH_TOKEN_CAN_READ_PACKAGES:
+      SECRET_GH_TOKEN_CAN_READ_PACKAGES:
         required: true
       SECRET_ECR_REGISTRY:
         required: true
@@ -35,7 +35,7 @@ jobs:
           
       - run: (rm .npmrc || true) && npm install
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GH_TOKEN_CAN_READ_PACKAGES }}
+          NODE_AUTH_TOKEN: ${{ secrets.SECRET_GH_TOKEN_CAN_READ_PACKAGES }}
           
       - run: npm run build    
 
