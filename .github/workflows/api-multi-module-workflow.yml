@@ -36,11 +36,11 @@ on:
         required: true
       SECRET_GITHUB_USERNAME:
         required: true
-      SECRET_AWS_ACCESS_KEY_ID:
+      SECRET_ECR_REGISTRY:
         required: true
-      SECRET_AWS_SECRET_ACCESS_KEY:
+      SECRET_ECR_USERNAME:
         required: true
-      SECRET_AWS_REGION:
+      SECRET_ECR_PASSWORD:
         required: true
       SECRET_IMAGE_TAG:
         required: true
@@ -81,19 +81,19 @@ jobs:
         run: cp /docker/api/Dockerfile ./
         working-directory: ${{ inputs.MODULE_NAME }}
 
-      - name: Login to Amazon ECR
+      - name: Login to ECR
         if: ${{ inputs.IS_ECR_PUSH_ENABLED }}
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.SECRET_AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.SECRET_AWS_REGION }}
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ secrets.SECRET_ECR_REGISTRY }}
+          username: ${{ secrets.SECRET_ECR_USERNAME }}
+          password: ${{ secrets.SECRET_ECR_PASSWORD }}
 
       - name: Build, tag, and push image to Amazon ECR
         if: ${{ inputs.IS_ECR_PUSH_ENABLED }}
         env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REGISTRY: ${{ secrets.SECRET_ECR_REGISTRY }}
           ECR_REPOSITORY: ${{ inputs.ECR_REPOSITORY }}
           IMAGE_TAG: ${{ secrets.SECRET_IMAGE_TAG }}
           BOOT_JAR_NAME: ${{ inputs.BOOT_JAR_NAME }}
@@ -103,7 +103,3 @@ jobs:
           docker build --build-arg=IMAGE_TAG=$IMAGE_TAG --build-arg=BOOT_JAR_NAME=$BOOT_JAR_NAME -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
         working-directory: ${{ inputs.MODULE_NAME }}
-
-      - name: Logout of Amazon ECR
-        if: always() && ${{ inputs.IS_ECR_PUSH_ENABLED }}
-        run: docker logout ${{ steps.login-ecr.outputs.registry }}
