@@ -11,6 +11,11 @@ on:
         description: "Disable pushing to ECR. Default is true."
         required: true
         type: boolean
+      NODE_VERSION:
+        description: "Node version to setup. Default is 14."
+        required: true
+        type: string
+        default: '14'
     secrets:
       SECRET_GH_TOKEN_CAN_READ_PACKAGES:
         required: true
@@ -30,7 +35,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: ${{ inputs.NODE_VERSION }}
           registry-url: 'https://npm.pkg.github.com'
           
       - run: (rm .npmrc || true) && npm install
