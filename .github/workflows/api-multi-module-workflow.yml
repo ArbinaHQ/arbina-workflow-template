@@ -90,7 +90,7 @@ jobs:
           username: ${{ secrets.SECRET_ECR_USERNAME }}
           password: ${{ secrets.SECRET_ECR_PASSWORD }}
 
-      - name: Build, tag, and push image to Amazon ECR
+      - name: Build, tag, and push image to ECR
         if: ${{ inputs.IS_ECR_PUSH_ENABLED }}
         env:
           ECR_REGISTRY: ${{ secrets.SECRET_ECR_REGISTRY }}
