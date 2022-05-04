@@ -13,7 +13,7 @@ on:
         type: boolean
       NODE_VERSION:
         description: "Node version to setup. Default is 14."
-        required: true
+        required: false
         type: string
         default: '14'
     secrets:
