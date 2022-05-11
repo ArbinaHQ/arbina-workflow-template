@@ -13,8 +13,9 @@ on:
         type: boolean
       IS_BUILD_ENABLED:
         description: "Enable building. Default is true."
-        required: true
+        required: false
         type: boolean
+        default: true
       NODE_VERSION:
         description: "Node version to setup. Default is 14."
         required: false
