@@ -17,10 +17,10 @@ on:
         type: boolean
         default: true
       NODE_VERSION:
-        description: "Node version to setup. Default is 14."
+        description: "Node version to setup. Default is 16."
         required: false
         type: string
-        default: '14'
+        default: '16'
     secrets:
       SECRET_GH_TOKEN_CAN_READ_PACKAGES:
         required: true
