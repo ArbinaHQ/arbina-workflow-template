@@ -41,7 +41,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ inputs.NODE_VERSION }}
-#          registry-url: 'https://npm.pkg.github.com'
+          registry-url: 'https://npm.pkg.github.com'
 #          scope: '@arbinahq'
           
 #      - run: (rm .npmrc || true) && npm install
