@@ -41,10 +41,11 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ inputs.NODE_VERSION }}
-          registry-url: 'https://npm.pkg.github.com'
-          scope: '@arbinahq'
+#          registry-url: 'https://npm.pkg.github.com'
+#          scope: '@arbinahq'
           
-      - run: (rm .npmrc || true) && npm install
+#      - run: (rm .npmrc || true) && npm install
+      - run: npm install
         env:
           NODE_AUTH_TOKEN: ${{ secrets.SECRET_GH_TOKEN_CAN_READ_PACKAGES }}
           
