@@ -24,11 +24,11 @@ on:
         required: true
         type: boolean
       IS_COPY_DOCKERFILE:
-        description: "Using for copy default dockerfile."
+        description: "Using for copy default dockerfile from https://github.com/ArbinaHQ/arbina-github-runner/tree/master/docker/api."
         required: true
         type: boolean
       IS_COPY_DOCKER_DIRECTORY:
-        description: "Using for copy default docker directory (entrypoint, cron, healthcheck)."
+        description: "Using for copy default docker directory (entrypoint, cron, healthcheck) from https://github.com/ArbinaHQ/arbina-github-runner/tree/master/docker/api."
         required: true
         type: boolean
     secrets:
