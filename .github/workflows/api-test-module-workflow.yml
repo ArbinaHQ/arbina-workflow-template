@@ -7,11 +7,6 @@ on:
         description: "Using for choice specified module when test application."
         required: true
         type: string
-    secrets:
-      SECRET_GITHUB_TOKEN:
-        required: true
-      SECRET_GITHUB_USERNAME:
-        required: true
 
 jobs:
   api-test-module-workflow:
@@ -28,6 +23,3 @@ jobs:
 
       - name: Test application with Gradle
         run: ./gradlew test -p ${{ inputs.MODULE_NAME }}
-        env:
-          GITHUB_USERNAME: ${{ secrets.SECRET_GITHUB_USERNAME }}
-          GITHUB_TOKEN: ${{ secrets.SECRET_GITHUB_TOKEN }}
