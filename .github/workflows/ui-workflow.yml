@@ -11,11 +11,16 @@ on:
         description: "Disable pushing to ECR. Default is true."
         required: true
         type: boolean
+      IS_BUILD_ENABLED:
+        description: "Enable building. Default is true."
+        required: false
+        type: boolean
+        default: true
       NODE_VERSION:
-        description: "Node version to setup. Default is 14."
+        description: "Node version to setup. Default is 16."
         required: false
         type: string
-        default: '14'
+        default: '16'
     secrets:
       SECRET_GH_TOKEN_CAN_READ_PACKAGES:
         required: true
@@ -37,12 +42,14 @@ jobs:
         with:
           node-version: ${{ inputs.NODE_VERSION }}
           registry-url: 'https://npm.pkg.github.com'
+          scope: '@arbinahq'
           
       - run: (rm .npmrc || true) && npm install
         env:
           NODE_AUTH_TOKEN: ${{ secrets.SECRET_GH_TOKEN_CAN_READ_PACKAGES }}
           
-      - run: npm run build    
+      - run: npm run build
+        if: ${{ inputs.IS_BUILD_ENABLED }}
 
       - name: Login to ECR
         if: ${{ inputs.IS_ECR_PUSH_ENABLED }}
