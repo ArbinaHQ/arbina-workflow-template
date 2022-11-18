@@ -84,7 +84,7 @@ jobs:
       - name: Login to ECR
         if: ${{ inputs.IS_ECR_PUSH_ENABLED }}
         id: login-ecr
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           registry: ${{ secrets.SECRET_ECR_REGISTRY }}
           username: ${{ secrets.SECRET_ECR_USERNAME }}
