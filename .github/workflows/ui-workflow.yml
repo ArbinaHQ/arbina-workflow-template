@@ -48,6 +48,8 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.SECRET_GH_TOKEN_CAN_READ_PACKAGES }}
           
+      - run: echo IMAGE_TAG=${{ secrets.SECRET_IMAGE_TAG }} >> .env
+          
       - run: npm run build
         if: ${{ inputs.IS_BUILD_ENABLED }}
 
