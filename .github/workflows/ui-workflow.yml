@@ -50,7 +50,9 @@ jobs:
           scope: '@arbinahq'
         
       - name: Add envs
-        run: echo ${{ inputs.GIT_REVISION_ENV_NAME }}=${{ secrets.SECRET_IMAGE_TAG }} >> .env
+        run: |
+          echo ${{ inputs.GIT_REVISION_ENV_NAME }}=${{ secrets.SECRET_IMAGE_TAG }} >> .env
+          cat .env
           
       - name: NPM install packages
         run: (rm .npmrc || true) && npm install
