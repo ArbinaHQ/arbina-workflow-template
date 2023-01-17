@@ -43,14 +43,17 @@ jobs:
           node-version: ${{ inputs.NODE_VERSION }}
           registry-url: 'https://npm.pkg.github.com'
           scope: '@arbinahq'
+        
+      - name: Add envs
+        run: echo IMAGE_TAG=${{ secrets.SECRET_IMAGE_TAG }} >> .env
           
-      - run: (rm .npmrc || true) && npm install
+      - name: NPM install packages
+        run: (rm .npmrc || true) && npm install
         env:
           NODE_AUTH_TOKEN: ${{ secrets.SECRET_GH_TOKEN_CAN_READ_PACKAGES }}
-          
-      - run: echo IMAGE_TAG=${{ secrets.SECRET_IMAGE_TAG }} >> .env
-          
-      - run: npm run build
+                  
+      - name: NPM build
+        run: npm run build
         if: ${{ inputs.IS_BUILD_ENABLED }}
 
       - name: Login to ECR
