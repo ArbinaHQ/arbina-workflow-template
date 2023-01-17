@@ -45,7 +45,7 @@ jobs:
           scope: '@arbinahq'
         
       - name: Add envs
-        run: echo IMAGE_TAG=${{ secrets.SECRET_IMAGE_TAG }} >> .env
+        run: echo VITE_GIT_COMMIT=${{ secrets.SECRET_IMAGE_TAG }} >> .env
           
       - name: NPM install packages
         run: (rm .npmrc || true) && npm install
