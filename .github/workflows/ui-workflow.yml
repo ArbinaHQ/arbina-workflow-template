@@ -7,6 +7,11 @@ on:
         description: "Docker repository address"
         required: true
         type: string
+      GIT_REVISION_ENV_NAME:
+        description: "Env name for setting git revision"
+        required: false
+        type: string
+        default: 'REACT_GIT_REVISION'
       IS_ECR_PUSH_ENABLED:
         description: "Disable pushing to ECR. Default is true."
         required: true
@@ -45,7 +50,7 @@ jobs:
           scope: '@arbinahq'
         
       - name: Add envs
-        run: echo VITE_GIT_COMMIT=${{ secrets.SECRET_IMAGE_TAG }} >> .env
+        run: echo ${{ inputs.GIT_REVISION_ENV_NAME }}=${{ secrets.SECRET_IMAGE_TAG }} >> .env
           
       - name: NPM install packages
         run: (rm .npmrc || true) && npm install
