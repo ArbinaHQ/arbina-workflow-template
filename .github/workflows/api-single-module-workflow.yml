@@ -58,14 +58,14 @@ jobs:
         if: ${{ inputs.IS_TEST_ENABLED }}
         run: ./gradlew test
         env:
-          GITHUB_USERNAME: ${{ secrets.SECRET_GITHUB_USERNAME }}
           GITHUB_TOKEN: ${{ secrets.SECRET_GITHUB_TOKEN }}
+          GITHUB_USERNAME: ${{ secrets.SECRET_GITHUB_USERNAME }}
 
       - name: Build application with Gradle
         run: ./gradlew bootJar
         env:
-          GITHUB_USERNAME: ${{ secrets.SECRET_GITHUB_USERNAME }}
           GITHUB_TOKEN: ${{ secrets.SECRET_GITHUB_TOKEN }}
+          GITHUB_USERNAME: ${{ secrets.SECRET_GITHUB_USERNAME }}
 
       - name: Copy docker directory
         if: ${{ inputs.IS_COPY_DOCKER_DIRECTORY }}
