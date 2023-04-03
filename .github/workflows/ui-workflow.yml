@@ -68,12 +68,6 @@ jobs:
         run: npm run build
         if: ${{ inputs.IS_BUILD_ENABLED }}
 
-      - uses: sonarsource/sonarqube-scan-action@master
-        env:
-          SONAR_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONARQUBE_HOST_URL }}
-        secrets: inherit
-
       - name: Login to ECR
         if: ${{ inputs.IS_ECR_PUSH_ENABLED }}
         id: login-ecr
