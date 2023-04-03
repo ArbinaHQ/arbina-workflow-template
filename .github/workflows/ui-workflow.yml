@@ -72,6 +72,7 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONARQUBE_HOST_URL }}
+        secrets: inherit
 
       - name: Login to ECR
         if: ${{ inputs.IS_ECR_PUSH_ENABLED }}
