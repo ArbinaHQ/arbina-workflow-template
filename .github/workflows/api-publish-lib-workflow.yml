@@ -7,6 +7,10 @@ on:
         description: "Using for choice specified module when build application."
         required: true
         type: string
+      IS_TEST_ENABLED:
+        description: "Using for start test before pushing to ECR if value is true."
+        default: false
+        type: boolean
     secrets:
       SECRET_GITHUB_TOKEN:
         required: true
@@ -29,6 +33,13 @@ jobs:
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
+
+      - name: Test with Gradle
+        if: ${{ inputs.IS_TEST_ENABLED }}
+        run: ./gradlew test -p ${{ inputs.MODULE_NAME }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.SECRET_GITHUB_TOKEN }}
+          GITHUB_USERNAME: ${{ secrets.SECRET_GITHUB_USERNAME }}
 
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
