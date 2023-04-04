@@ -8,7 +8,7 @@ on:
         required: true
         type: string
       IS_TEST_ENABLED:
-        description: "Using for start test before pushing to ECR if value is true."
+        description: "Using for start test before pushing if value is true."
         default: false
         type: boolean
     secrets:
