@@ -37,4 +37,4 @@ jobs:
           GITHUB_USERNAME: ${{ secrets.GH_USER_CAN_READ_PACKAGES || secrets.GH_DEPBOT_USER_CAN_READ_PACKAGES }}
           SONAR_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONARQUBE_HOST_URL }}
-        run: ./gradlew build test sonar
+        run: ./gradlew build jacocoTestReport test sonar
