@@ -30,7 +30,7 @@ jobs:
         with:
           java-version: ${{ inputs.JAVA_VERSION }}
           distribution: 'zulu'
-          cache: 'gradle'
+#          cache: 'gradle'
           settings-path: ${{ github.workspace }}
 
       - name: Grant execute permission for gradlew

@@ -26,7 +26,7 @@ jobs:
         with:
           java-version: ${{ inputs.JAVA_VERSION }}
           distribution: 'zulu'
-          cache: 'gradle'
+#          cache: 'gradle'
 
       - name: Build and analyze
         if: ${{ !inputs.IS_TEST_ENABLED }}
