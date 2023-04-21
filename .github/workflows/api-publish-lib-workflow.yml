@@ -25,7 +25,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Set up JDK 17
+      - name: Set up JDK ${{ inputs.JAVA_VERSION }}
         uses: actions/setup-java@v3
         with:
           java-version: ${{ inputs.JAVA_VERSION }}
