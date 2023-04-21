@@ -4,18 +4,14 @@ on:
   workflow_call:
     inputs:
       MODULE_NAME:
-        description: "Using for choice specified module when build application."
-        required: true
+        description: "Using for choice specified module when build application. 
+          If not present - used project directory for build and test"
+        default: .
         type: string
       IS_TEST_ENABLED:
         description: "Using for start test before pushing if value is true."
         default: false
         type: boolean
-    secrets:
-      SECRET_GITHUB_TOKEN:
-        required: true
-      SECRET_GITHUB_USERNAME:
-        required: true
 
 jobs:
   api-multi-module-lib-publish:
@@ -46,5 +42,5 @@ jobs:
       - name: Publish package
         run: ./gradlew publish -p ${{ inputs.MODULE_NAME }}
         env:
-          GITHUB_TOKEN: ${{ secrets.SECRET_GITHUB_TOKEN }}
-          GITHUB_USERNAME: ${{ secrets.SECRET_GITHUB_USERNAME }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_RW_PACKAGES_AND_REPOS }}
+          GITHUB_USERNAME: ${{ secrets.GH_USER_CAN_READ_PACKAGES }}
