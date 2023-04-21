@@ -6,6 +6,11 @@ on:
         description: "Using for start test before pushing to ECR if value is true."
         required: true
         type: boolean
+      JAVA_VERSION:
+        description: "Using for set version Java in build"
+        default: "17"
+        required: false
+        type: string
 
 jobs:
   sonar-check:
@@ -19,8 +24,8 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
+          java-version: ${{ inputs.JAVA_VERSION }}
           distribution: 'zulu'
-          java-version: '17'
           cache: 'gradle'
 
       - name: Build and analyze

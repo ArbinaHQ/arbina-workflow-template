@@ -31,6 +31,11 @@ on:
         description: "Using for copy default docker directory (entrypoint, cron, healthcheck) from https://github.com/ArbinaHQ/arbina-github-runner/tree/master/docker/api."
         required: true
         type: boolean
+      JAVA_VERSION:
+        description: "Using for set version Java in build"
+        default: "17"
+        required: false
+        type: string
 
 jobs:
   api-multi-module-workflow:
@@ -38,9 +43,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK 17
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v3
         with:
-          java-version: 17
+          java-version: ${{ inputs.JAVA_VERSION }}
+          distribution: 'zulu'
+          cache: 'gradle'
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew

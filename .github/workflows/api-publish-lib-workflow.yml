@@ -12,19 +12,25 @@ on:
         description: "Using for start test before pushing if value is true."
         default: false
         type: boolean
+      JAVA_VERSION:
+        description: "Using for set version Java in build"
+        default: "17"
+        required: false
+        type: string
 
 jobs:
-  api-multi-module-lib-publish:
+  api-lib-publish:
 
     runs-on: self-hosted
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up JDK 17
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v3
         with:
-          java-version: 17
-          server-id: github
+          java-version: ${{ inputs.JAVA_VERSION }}
+          distribution: 'zulu'
+          cache: 'gradle'
           settings-path: ${{ github.workspace }}
 
       - name: Grant execute permission for gradlew

@@ -29,9 +29,9 @@ on:
         type: boolean
       JAVA_VERSION:
         description: "Using for set version Java in build"
+        default: "17"
         required: false
         type: string
-        default: "17"
 
 jobs:
   api-single-module-workflow:
