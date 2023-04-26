@@ -1,4 +1,4 @@
-name: Reusable workflow. Using test API module
+name: Reusable workflow. Using test API module V2
 
 on:
   workflow_call:
@@ -13,11 +13,6 @@ on:
         default: "17"
         required: false
         type: string
-    secrets:
-      SECRET_GITHUB_TOKEN:
-        required: true
-      SECRET_GITHUB_USERNAME:
-        required: true
 
 jobs:
   api-test-module-workflow:
@@ -37,5 +32,5 @@ jobs:
       - name: Test application with Gradle
         run: ./gradlew test -p ${{ inputs.MODULE_NAME }}
         env:
-          GITHUB_TOKEN: ${{ secrets.SECRET_GITHUB_TOKEN }}
-          GITHUB_USERNAME: ${{ secrets.SECRET_GITHUB_USERNAME }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_CAN_READ_PACKAGES || secrets.GH_DEPBOT_TOKEN_CAN_READ_PACKAGES }}
+          GITHUB_USERNAME: ${{ secrets.GH_USER_CAN_READ_PACKAGES || secrets.GH_DEPBOT_USER_CAN_READ_PACKAGES }}

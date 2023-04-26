@@ -5,7 +5,7 @@ on:
     inputs:
       MODULE_NAME:
         description: "Using for choice specified module when build application. 
-          If not present - used project directory for build and test"
+                        If not present - used project directory for build and test"
         default: .
         type: string
       ECR_REPOSITORY:
