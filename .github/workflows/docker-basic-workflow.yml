@@ -63,4 +63,5 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG_ECR
           
       - name: Logout on Arbina ECR
+        if: ${{ inputs.IS_ECR_PUSH_ENABLED }}
         run: docker logout ${{ secrets.SECRET_ECR_REGISTRY }}
