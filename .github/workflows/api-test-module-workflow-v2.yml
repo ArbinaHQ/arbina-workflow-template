@@ -10,7 +10,7 @@ on:
         type: string
       JAVA_VERSION:
         description: "Using for set version Java in build"
-        default: "17"
+        default: "21"
         required: false
         type: string
 
@@ -18,9 +18,9 @@ jobs:
   api-test-module-workflow:
     runs-on: custom
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up JDK ${{ inputs.JAVA_VERSION }}
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: ${{ inputs.JAVA_VERSION }}
           distribution: 'zulu'
