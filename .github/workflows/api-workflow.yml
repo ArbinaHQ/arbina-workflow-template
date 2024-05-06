@@ -54,6 +54,9 @@ jobs:
           java-version: ${{ inputs.JAVA_VERSION }}
           distribution: 'zulu'
           cache: 'gradle'
+          cache-dependency-path: |
+            ./**/*.gradle*
+            ${{ inputs.MODULE_NAME }}/**.gradle*
 
       - name: Setup Gradle ${{ inputs.GRADLE_VERSION }}
         uses: gradle/actions/setup-gradle@v3.3.2
