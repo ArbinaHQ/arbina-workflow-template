@@ -101,7 +101,7 @@ jobs:
           ECR_REPOSITORY: ${{ inputs.ECR_REPOSITORY }}
           IMAGE_TAG: ${{ github.sha }}
           BOOT_JAR_NAME: ${{ inputs.BOOT_JAR_NAME }}
-          $SPRING_BOOT_LOADER: ${{ inputs.SPRING_BOOT_LOADER }}
+          SPRING_BOOT_LOADER: ${{ inputs.SPRING_BOOT_LOADER }}
         run: |
           docker build --build-arg=IMAGE_TAG=$IMAGE_TAG --build-arg=BOOT_JAR_NAME=$BOOT_JAR_NAME --build-arg=SPRING_BOOT_LOADER=$SPRING_BOOT_LOADER -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
