@@ -17,6 +17,11 @@ on:
         default: "21"
         required: false
         type: string
+      GRADLE_VERSION:
+        description: "Using for set version Gradle in build"
+        default: "8.7"
+        required: false
+        type: string
 
 jobs:
   api-lib-publish:
@@ -30,15 +35,16 @@ jobs:
         with:
           java-version: ${{ inputs.JAVA_VERSION }}
           distribution: 'zulu'
-#          cache: 'gradle'
           settings-path: ${{ github.workspace }}
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+      - name: Setup Gradle ${{ inputs.GRADLE_VERSION }}
+        uses: gradle/actions/setup-gradle@v3.3.2
+        with:
+          gradle-version: ${{ inputs.GRADLE_VERSION }}
 
       - name: Test with Gradle
         if: ${{ inputs.IS_TEST_ENABLED }}
-        run: ./gradlew test -p ${{ inputs.MODULE_NAME }}
+        run: gradle test -p ${{ inputs.MODULE_NAME }}
         env:
           GITHUB_TOKEN: ${{ secrets.SECRET_GITHUB_TOKEN }}
           GITHUB_USERNAME: ${{ secrets.SECRET_GITHUB_USERNAME }}
@@ -46,7 +52,7 @@ jobs:
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
       - name: Publish package
-        run: ./gradlew publish -p ${{ inputs.MODULE_NAME }}
+        run: gradle publish -p ${{ inputs.MODULE_NAME }}
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN_RW_PACKAGES_AND_REPOS }}
           GITHUB_USERNAME: ${{ secrets.GH_USER_CAN_READ_PACKAGES }}
