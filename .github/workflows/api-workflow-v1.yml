@@ -45,7 +45,7 @@ on:
       SPRING_BOOT_LOADER:
         description: "Used for run spring boot application"
         default: "org.springframework.boot.loader.launch.JarLauncher"
-        required: true
+        required: false
         type: string
 
 jobs:
