@@ -37,10 +37,10 @@ on:
         default: "21"
         required: false
         type: string
-      GRADLE_VERSION:
-        description: "Using for set version Gradle in build"
-        default: "8.7"
-        required: false
+      SPRING_BOOT_LOADER:
+        description: "Used for run spring boot application"
+        default: "org.springframework.boot.loader.launch.JarLauncher"
+        required: true
         type: string
 
 jobs:
@@ -102,8 +102,8 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
           BOOT_JAR_NAME: ${{ inputs.BOOT_JAR_NAME }}
         run: |
-          docker build --build-arg=IMAGE_TAG=$IMAGE_TAG --build-arg=BOOT_JAR_NAME=$BOOT_JAR_NAME -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker build --build-arg=IMAGE_TAG=$IMAGE_TAG --build-arg=BOOT_JAR_NAME=$BOOT_JAR_NAME --build-arg=SPRING_BOOT_LOADER=SPRING_BOOT_LOADER -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          docker build --build-arg=IMAGE_TAG=$IMAGE_TAG --build-arg=BOOT_JAR_NAME=$BOOT_JAR_NAME -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+          docker build --build-arg=IMAGE_TAG=$IMAGE_TAG --build-arg=BOOT_JAR_NAME=$BOOT_JAR_NAME --build-arg=SPRING_BOOT_LOADER=SPRING_BOOT_LOADER -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
         working-directory: ${{ inputs.MODULE_NAME }}
