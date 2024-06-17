@@ -71,7 +71,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN_CAN_READ_PACKAGES || secrets.GH_DEPBOT_TOKEN_CAN_READ_PACKAGES }}
           GITHUB_USERNAME: ${{ secrets.GH_USER_CAN_READ_PACKAGES || secrets.GH_DEPBOT_USER_CAN_READ_PACKAGES }}
           BOOT_JAR_NAME : ${{ inputs.BOOT_JAR_NAME }}
-        run: gradle bootJar -p ${{ inputs.MODULE_NAME }} --parallel --no-daemon
+        run: gradle build -p ${{ inputs.MODULE_NAME }} --parallel --no-daemon
 
       - name: Build and test application
         if: ${{ inputs.IS_TEST_ENABLED }}
@@ -79,7 +79,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN_CAN_READ_PACKAGES || secrets.GH_DEPBOT_TOKEN_CAN_READ_PACKAGES }}
           GITHUB_USERNAME: ${{ secrets.GH_USER_CAN_READ_PACKAGES || secrets.GH_DEPBOT_USER_CAN_READ_PACKAGES }}
           BOOT_JAR_NAME : ${{ inputs.BOOT_JAR_NAME }}
-        run: gradle bootJar test -p ${{ inputs.MODULE_NAME }} --parallel --no-daemon
+        run: gradle build test -p ${{ inputs.MODULE_NAME }} --parallel --no-daemon
 
       - name: Copy docker directory
         if: ${{ inputs.IS_COPY_DOCKER_DIRECTORY }}
