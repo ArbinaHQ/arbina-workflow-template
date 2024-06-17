@@ -34,7 +34,6 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: ${{ inputs.GRADLE_VERSION }}
-          cache-overwrite-existing: true
 
       - name: Test application with Gradle
         run: gradle test -p ${{ inputs.MODULE_NAME }} --parallel
