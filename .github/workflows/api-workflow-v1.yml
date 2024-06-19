@@ -108,8 +108,7 @@ jobs:
           BOOT_JAR_NAME: ${{ inputs.BOOT_JAR_NAME }}
           SPRING_BOOT_LOADER: ${{ inputs.SPRING_BOOT_LOADER }}
         run: |
-          docker build --build-arg=IMAGE_TAG=$IMAGE_TAG --build-arg=BOOT_JAR_NAME=$BOOT_JAR_NAME --build-arg=SPRING_BOOT_LOADER=$SPRING_BOOT_LOADER -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker build --build-arg=IMAGE_TAG=$IMAGE_TAG --build-arg=BOOT_JAR_NAME=$BOOT_JAR_NAME --build-arg=SPRING_BOOT_LOADER=$SPRING_BOOT_LOADER -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          docker build --build-arg=IMAGE_TAG=$IMAGE_TAG --build-arg=BOOT_JAR_NAME=$BOOT_JAR_NAME --build-arg=SPRING_BOOT_LOADER=$SPRING_BOOT_LOADER -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
         working-directory: ${{ inputs.MODULE_NAME }}
