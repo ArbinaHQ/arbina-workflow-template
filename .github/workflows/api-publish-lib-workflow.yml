@@ -38,7 +38,7 @@ jobs:
           settings-path: ${{ github.workspace }}
 
       - name: Setup Gradle ${{ inputs.GRADLE_VERSION }}
-        uses: gradle/actions/setup-gradle@v3.3.2
+        uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: ${{ inputs.GRADLE_VERSION }}
 
@@ -50,7 +50,7 @@ jobs:
           GITHUB_USERNAME: ${{ secrets.SECRET_GITHUB_USERNAME }}
 
       - name: Validate Gradle wrapper
-        uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
+        uses: gradle/wrapper-validation-action@v3
       - name: Publish package
         run: gradle publish -p ${{ inputs.MODULE_NAME }}
         env:
