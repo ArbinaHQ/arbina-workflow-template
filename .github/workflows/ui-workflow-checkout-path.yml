@@ -96,10 +96,11 @@ jobs:
           BOOT_JAR_NAME: ${{ inputs.BOOT_JAR_NAME }}
           IMAGE_TAG_ECR: ${{ inputs.IMAGE_TAG_ECR }}
         run: |
-          docker build --build-arg=IMAGE_TAG=$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ${{ inputs.CHECKOUT_PATH }}
+          docker build --build-arg=IMAGE_TAG=$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          docker build --build-arg=IMAGE_TAG=$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG_ECR ${{ inputs.CHECKOUT_PATH }}
+          docker build --build-arg=IMAGE_TAG=$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG_ECR .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG_ECR
+        working-directory: ${{ inputs.CHECKOUT_PATH }}
           
       - name: Logout on Arbina ECR
         run: docker logout ${{ secrets.SECRET_ECR_REGISTRY }}
