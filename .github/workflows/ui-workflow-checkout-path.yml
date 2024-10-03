@@ -1,4 +1,4 @@
-name: Reusable workflow. Used to build and push UI without checkout for building in subprojects.
+name: Reusable workflow. Used to build and push UI with path checkout for building in subprojects.
 
 on:
   workflow_call:
@@ -31,6 +31,10 @@ on:
         required: false
         type: string
         default: '16'
+      CHECKOUT_PATH:
+        description: "Path to checkout"
+        required: true
+        type: string
     secrets:
       SECRET_GH_TOKEN_CAN_READ_PACKAGES:
         required: true
@@ -47,6 +51,11 @@ jobs:
   ui-build-and-push-to-ecr:
     runs-on: custom
     steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: ${{ inputs.CHECKOUT_PATH }}
+          sparse-checkout-cone-mode: false
+          
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.NODE_VERSION }}
