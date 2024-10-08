@@ -39,7 +39,7 @@ on:
         type: string
       GRADLE_VERSION:
         description: "Using for set version Gradle in build"
-        default: "8.7"
+        default: "8.10.2"
         required: false
         type: string
 
