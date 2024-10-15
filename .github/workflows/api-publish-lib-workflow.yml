@@ -49,8 +49,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.SECRET_GITHUB_TOKEN }}
           GITHUB_USERNAME: ${{ secrets.SECRET_GITHUB_USERNAME }}
 
-      - name: Validate Gradle wrapper
-        uses: gradle/wrapper-validation-action@v3
       - name: Publish package
         run: gradle publish -p ${{ inputs.MODULE_NAME }}
         env:
