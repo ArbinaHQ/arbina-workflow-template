@@ -39,7 +39,7 @@ on:
         type: string
       GRADLE_VERSION:
         description: "Using for set version Gradle in build"
-        default: "8.10.2"
+        default: "8.11.1"
         required: false
         type: string
 
@@ -55,7 +55,7 @@ jobs:
           distribution: 'zulu'
 
       - name: Setup Gradle ${{ inputs.GRADLE_VERSION }}
-        uses: gradle/actions/setup-gradle@v3.3.2
+        uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: ${{ inputs.GRADLE_VERSION }}
 
