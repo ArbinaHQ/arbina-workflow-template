@@ -26,7 +26,7 @@ on:
 jobs:
   api-lib-publish:
 
-    runs-on: self-hosted
+    runs-on: custom
 
     steps:
       - uses: actions/checkout@v4
