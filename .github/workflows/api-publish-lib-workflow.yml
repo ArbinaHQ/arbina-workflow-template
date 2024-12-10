@@ -25,9 +25,7 @@ on:
 
 jobs:
   api-lib-publish:
-
     runs-on: custom
-
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK ${{ inputs.JAVA_VERSION }}
