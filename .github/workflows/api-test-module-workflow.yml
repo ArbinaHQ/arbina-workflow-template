@@ -34,7 +34,6 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: ${{ inputs.GRADLE_VERSION }}
-          cache-disabled: true
 
       - name: Test application with Gradle
         env:

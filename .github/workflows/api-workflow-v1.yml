@@ -63,7 +63,6 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: ${{ inputs.GRADLE_VERSION }}
-          cache-disabled: true
 
       - name: Build application
         if: ${{ !inputs.IS_TEST_ENABLED }}
