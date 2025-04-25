@@ -33,4 +33,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ inputs.ECR_REPOSITORY }}:latest, ${{ github.sha }}
+          tags: ecr.arbina.com/${{ inputs.ECR_REPOSITORY }}:latest, ecr.arbina.com/${{ inputs.ECR_REPOSITORY }}:${{ github.sha }}
