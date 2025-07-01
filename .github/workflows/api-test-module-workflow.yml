@@ -15,7 +15,7 @@ on:
         type: string
       GRADLE_VERSION:
         description: "Using for set version Gradle in build"
-        default: "8.13"
+        default: "8.14.2"
         required: false
         type: string
 
