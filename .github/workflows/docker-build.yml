@@ -1,0 +1,36 @@
+name: Reusable workflow. Using to build, test and push API
+
+on:
+  workflow_call:
+    inputs:
+      ECR_REPOSITORY:
+        description: "Using for deploy docker image to ECR"
+        required: true
+        type: string
+      IS_ECR_PUSH_ENABLED:
+        description: "Using for disable pushing to ECR if value is true."
+        required: true
+        type: boolean
+
+jobs:
+  api-multi-module-workflow:
+    runs-on: custom
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to ECR
+        if: ${{ inputs.IS_ECR_PUSH_ENABLED }}
+        id: login-ecr
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.ARBINA_ECR_REGISTRY }}
+          username: ${{ secrets.ARBINA_ECR_USERNAME }}
+          password: ${{ secrets.ARBINA_ECR_PASSWORD }}
+
+      - name: Build, tag, and push image to ECR
+        if:  ${{ inputs.IS_ECR_PUSH_ENABLED }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ecr.arbina.com/${{ inputs.ECR_REPOSITORY }}:latest, ecr.arbina.com/${{ inputs.ECR_REPOSITORY }}:${{ github.sha }}
