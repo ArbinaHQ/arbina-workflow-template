@@ -14,7 +14,7 @@ on:
 
 jobs:
   api-multi-module-workflow:
-    runs-on: custom
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
