@@ -1,0 +1,42 @@
+name: Reusable workflow. Using test API module V2
+
+on:
+  workflow_call:
+    inputs:
+      MODULE_NAME:
+        description: "Using for choice specified module when build application. 
+                        If not present - used project directory for build and test"
+        default: .
+        type: string
+      JAVA_VERSION:
+        description: "Using for set version Java in build"
+        default: "25"
+        required: false
+        type: string
+      GRADLE_VERSION:
+        description: "Using for set version Gradle in build"
+        default: "9.1.0"
+        required: false
+        type: string
+
+jobs:
+  api-test-module-workflow:
+    runs-on: custom
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK ${{ inputs.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ inputs.JAVA_VERSION }}
+          distribution: 'zulu'
+
+      - name: Setup Gradle ${{ inputs.GRADLE_VERSION }}
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: ${{ inputs.GRADLE_VERSION }}
+
+      - name: Test application with Gradle
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_CAN_READ_PACKAGES || secrets.GH_DEPBOT_TOKEN_CAN_READ_PACKAGES }}
+          GITHUB_USERNAME: ${{ secrets.GH_USER_CAN_READ_PACKAGES || secrets.GH_DEPBOT_USER_CAN_READ_PACKAGES }}
+        run: gradle test -p ${{ inputs.MODULE_NAME }} --parallel

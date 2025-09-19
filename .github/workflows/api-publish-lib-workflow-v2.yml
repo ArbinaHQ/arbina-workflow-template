@@ -1,0 +1,54 @@
+name: Reusable workflow. Using to build and publish lib to GitHub Packages
+
+on:
+  workflow_call:
+    inputs:
+      MODULE_NAME:
+        description: "Using for choice specified module when build application. 
+                        If not present - used project directory for build and test"
+        default: .
+        type: string
+      IS_TEST_ENABLED:
+        description: "Using for start test before pushing if value is true."
+        default: false
+        type: boolean
+      JAVA_VERSION:
+        description: "Using for set version Java in build"
+        default: "25"
+        required: false
+        type: string
+      GRADLE_VERSION:
+        description: "Using for set version Gradle in build"
+        default: "9.1.0"
+        required: false
+        type: string
+
+jobs:
+  api-lib-publish:
+    runs-on: custom
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK ${{ inputs.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ inputs.JAVA_VERSION }}
+          distribution: 'zulu'
+          settings-path: ${{ github.workspace }}
+
+      - name: Setup Gradle ${{ inputs.GRADLE_VERSION }}
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: ${{ inputs.GRADLE_VERSION }}
+
+      - name: Test with Gradle
+        if: ${{ inputs.IS_TEST_ENABLED }}
+        run: gradle test -p ${{ inputs.MODULE_NAME }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.SECRET_GITHUB_TOKEN }}
+          GITHUB_USERNAME: ${{ secrets.SECRET_GITHUB_USERNAME }}
+
+      - name: Publish package
+        run: gradle publish -p ${{ inputs.MODULE_NAME }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_RW_PACKAGES_AND_REPOS }}
+          GITHUB_USERNAME: ${{ secrets.GH_USER_CAN_READ_PACKAGES }}
