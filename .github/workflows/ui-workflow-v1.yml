@@ -1,0 +1,104 @@
+name: Reusable workflow. Used to build and push UI
+
+on:
+  workflow_call:
+    inputs:
+      MODULE_NAME:
+        description: "Using for choice specified module when build application. 
+                        If not present - used project directory for build and test"
+        default: .
+        type: string
+      ECR_REPOSITORY:
+        description: "Docker repository address"
+        required: true
+        type: string
+      GIT_REVISION_ENV_NAME:
+        description: "Env name for setting git revision"
+        required: false
+        type: string
+        default: 'REACT_GIT_REVISION'
+      IS_ECR_PUSH_ENABLED:
+        description: "Disable pushing to ECR. Default is true."
+        required: true
+        type: boolean
+      IS_BUILD_ENABLED:
+        description: "Enable building. Default is true."
+        required: false
+        type: boolean
+        default: true
+      IMAGE_TAG_ECR:
+        description: "Select image tag for ECR"
+        required: false
+        type: string
+        default: latest
+      NODE_VERSION:
+        description: "Node version to setup. Default is 16."
+        required: false
+        type: string
+        default: '16'
+    secrets:
+      SECRET_GH_TOKEN_CAN_READ_PACKAGES:
+        required: true
+      SECRET_ECR_REGISTRY:
+        required: true
+      SECRET_ECR_USERNAME:
+        required: true
+      SECRET_ECR_PASSWORD:
+        required: true
+      SECRET_IMAGE_TAG:
+        required: true
+
+jobs:
+  ui-build-and-push-to-ecr:
+    runs-on: custom
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.NODE_VERSION }}
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@arbinahq'
+
+      - name: Add envs
+        run: |
+          echo ${{ inputs.GIT_REVISION_ENV_NAME }}=${{ secrets.SECRET_IMAGE_TAG }} >> .env
+          cat .env
+        working-directory: ${{ inputs.MODULE_NAME }}
+
+      - name: NPM install packages
+        run: (rm .npmrc || true) && npm install
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.SECRET_GH_TOKEN_CAN_READ_PACKAGES }}
+        working-directory: ${{ inputs.MODULE_NAME }}
+
+      - name: NPM build
+        run: npm run build
+        if: ${{ inputs.IS_BUILD_ENABLED }}
+        working-directory: ${{ inputs.MODULE_NAME }}
+
+      - name: Login to ECR
+        if: ${{ inputs.IS_ECR_PUSH_ENABLED }}
+        id: login-ecr
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.SECRET_ECR_REGISTRY }}
+          username: ${{ secrets.SECRET_ECR_USERNAME }}
+          password: ${{ secrets.SECRET_ECR_PASSWORD }}
+
+      - name: Build, tag, and push image to ECR
+        if: ${{ inputs.IS_ECR_PUSH_ENABLED }}
+        env:
+          ECR_REGISTRY: ${{ secrets.SECRET_ECR_REGISTRY }}
+          ECR_REPOSITORY: ${{ inputs.ECR_REPOSITORY }}
+          IMAGE_TAG: ${{ secrets.SECRET_IMAGE_TAG }}
+          BOOT_JAR_NAME: ${{ inputs.BOOT_JAR_NAME }}
+          IMAGE_TAG_ECR: ${{ inputs.IMAGE_TAG_ECR }}
+        run: |
+          docker build --build-arg=IMAGE_TAG=$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker build --build-arg=IMAGE_TAG=$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG_ECR .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG_ECR
+        working-directory: ${{ inputs.MODULE_NAME }}
+
+      - name: Logout on Arbina ECR
+        run: docker logout ${{ secrets.SECRET_ECR_REGISTRY }}
