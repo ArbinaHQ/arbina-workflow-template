@@ -1,0 +1,116 @@
+name: Reusable workflow. Using to build, test and push API
+
+on:
+  workflow_call:
+    inputs:
+      MODULE_NAME:
+        description: "Using for choice specified module when build application."
+        default: .
+        type: string
+      ECR_REPOSITORY:
+        description: "Using for deploy docker image to ECR"
+        required: true
+        type: string
+      BOOT_JAR_NAME:
+        description: "Using for start docker container."
+        required: true
+        type: string
+      IS_TEST_ENABLED:
+        description: "Using for start test before pushing to ECR if value is true."
+        required: true
+        type: boolean
+      IS_ECR_PUSH_ENABLED:
+        description: "Using for disable pushing to ECR if value is true."
+        required: true
+        type: boolean
+      IS_COPY_DOCKERFILE:
+        description: "Using for copy default dockerfile from https://github.com/ArbinaHQ/arbina-github-runner/tree/master/docker/api."
+        required: true
+        type: boolean
+      IS_COPY_DOCKER_DIRECTORY:
+        description: "Using for copy default docker directory (entrypoint, cron, healthcheck) from https://github.com/ArbinaHQ/arbina-github-runner/tree/master/docker/api."
+        required: true
+        type: boolean
+      JAVA_VERSION:
+        description: "Using for set version Java in build"
+        default: "25"
+        required: false
+        type: string
+      GRADLE_VERSION:
+        description: "Using for set version Gradle in build"
+        default: "9.2.1"
+        required: false
+        type: string
+      SPRING_BOOT_LOADER:
+        description: "Used for run spring boot application"
+        default: "org.springframework.boot.loader.launch.JarLauncher"
+        required: false
+        type: string
+
+jobs:
+  api-multi-module-workflow:
+    runs-on: custom
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK ${{ inputs.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ inputs.JAVA_VERSION }}
+          distribution: 'zulu'
+
+      - name: Setup Gradle ${{ inputs.GRADLE_VERSION }}
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: ${{ inputs.GRADLE_VERSION }}
+          cache-read-only: false
+          cache-disabled: false
+
+      - name: Build application
+        if: ${{ !inputs.IS_TEST_ENABLED }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_CAN_READ_PACKAGES || secrets.GH_DEPBOT_TOKEN_CAN_READ_PACKAGES }}
+          GITHUB_USERNAME: ${{ secrets.GH_USER_CAN_READ_PACKAGES || secrets.GH_DEPBOT_USER_CAN_READ_PACKAGES }}
+          BOOT_JAR_NAME : ${{ inputs.BOOT_JAR_NAME }}
+        run: gradle bootJar -p ${{ inputs.MODULE_NAME }} --parallel --no-daemon
+
+      - name: Build and test application
+        if: ${{ inputs.IS_TEST_ENABLED }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_CAN_READ_PACKAGES || secrets.GH_DEPBOT_TOKEN_CAN_READ_PACKAGES }}
+          GITHUB_USERNAME: ${{ secrets.GH_USER_CAN_READ_PACKAGES || secrets.GH_DEPBOT_USER_CAN_READ_PACKAGES }}
+          BOOT_JAR_NAME : ${{ inputs.BOOT_JAR_NAME }}
+        run: gradle bootJar test -p ${{ inputs.MODULE_NAME }} --parallel --no-daemon
+
+      - name: Copy docker directory
+        if: ${{ inputs.IS_COPY_DOCKER_DIRECTORY }}
+        run: cp -r /docker/api-v1/docker ./
+        working-directory: ${{ inputs.MODULE_NAME }}
+
+      - name: Copy dockerfile
+        if: ${{ inputs.IS_COPY_DOCKERFILE }}
+        run: cp /docker/api-v1/Dockerfile ./
+        working-directory: ${{ inputs.MODULE_NAME }}
+
+      - name: Login to ECR
+        if: ${{ inputs.IS_ECR_PUSH_ENABLED }}
+        id: login-ecr
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.ARBINA_ECR_PUBLIC_REGISTRY }}
+          username: ${{ secrets.ARBINA_ECR_PUBLIC_USERNAME }}
+          password: ${{ secrets.ARBINA_ECR_PUBLIC_PASSWORD }}
+
+      - name: Build, tag, and push image to ECR
+        if: ${{ inputs.IS_ECR_PUSH_ENABLED }}
+        env:
+          ECR_REGISTRY: ${{ secrets.ARBINA_ECR_PUBLIC_REGISTRY }}
+          ECR_REPOSITORY: ${{ inputs.ECR_REPOSITORY }}
+          IMAGE_TAG: ${{ github.sha }}
+          BOOT_JAR_NAME: ${{ inputs.BOOT_JAR_NAME }}
+          SPRING_BOOT_LOADER: ${{ inputs.SPRING_BOOT_LOADER }}
+          JAVA_VERSION: ${{ inputs.JAVA_VERSION }}
+        run: |
+          docker build --build-arg=IMAGE_TAG=$IMAGE_TAG --build-arg=JAVA_VERSION=$JAVA_VERSION --build-arg=BOOT_JAR_NAME=$BOOT_JAR_NAME --build-arg=SPRING_BOOT_LOADER=$SPRING_BOOT_LOADER -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        working-directory: ${{ inputs.MODULE_NAME }}
