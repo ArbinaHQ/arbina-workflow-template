@@ -127,5 +127,5 @@ jobs:
             JAVA_VERSION=${{ inputs.JAVA_VERSION }}
             BOOT_JAR_NAME=${{ inputs.BOOT_JAR_NAME }}
             SPRING_BOOT_LOADER=${{ inputs.SPRING_BOOT_LOADER }}
-          cache-from: type=registry,ref=${{ inputs.DOCKERHUB_REPOSITORY }}:buildcache
-          cache-to: type=registry,ref=${{ inputs.DOCKERHUB_REPOSITORY }}:buildcache,mode=max
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
