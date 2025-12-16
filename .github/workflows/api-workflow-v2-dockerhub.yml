@@ -104,6 +104,15 @@ jobs:
           username: ${{ secrets.ARBINA_AVIARADAR_ECR_USERNAME }}
           password: ${{ secrets.ARBINA_AVIARADAR_ECR_PASSWORD }}
 
+      - name: Login to ECR
+        if: ${{ inputs.IS_ECR_PUSH_ENABLED }}
+        id: login-ecr
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.ARBINA_ECR_REGISTRY }}
+          username: ${{ secrets.ARBINA_ECR_USERNAME }}
+          password: ${{ secrets.ARBINA_ECR_PASSWORD }}
+
       - name: Docker meta
         if: ${{ inputs.IS_DOCKERHUB_PUSH_ENABLED }}
         id: meta
