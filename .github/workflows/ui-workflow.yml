@@ -83,13 +83,13 @@ jobs:
           ECR_REGISTRY: ${{ secrets.SECRET_ECR_REGISTRY }}
           ECR_REPOSITORY: ${{ inputs.ECR_REPOSITORY }}
           IMAGE_TAG: ${{ secrets.SECRET_IMAGE_TAG }}
-          BOOT_JAR_NAME: ${{ inputs.BOOT_JAR_NAME }}
           IMAGE_TAG_ECR: ${{ inputs.IMAGE_TAG_ECR }}
         run: |
-          docker build --build-arg=IMAGE_TAG=$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker build --build-arg IMAGE_TAG=$IMAGE_TAG --build-arg NODE_AUTH_TOKEN=${{ secrets.SECRET_GH_TOKEN_CAN_READ_PACKAGES }} -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG_ECR
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          docker build --build-arg=IMAGE_TAG=$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG_ECR .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG_ECR
           
       - name: Logout on Arbina ECR
+        if: ${{ inputs.IS_ECR_PUSH_ENABLED }}
         run: docker logout ${{ secrets.SECRET_ECR_REGISTRY }}
