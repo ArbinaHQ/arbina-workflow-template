@@ -23,7 +23,7 @@ jobs:
         id: login-ecr
         uses: docker/login-action@v3
         with:
-          registry: ${{ secrets.ARBINA_ECR_REGISTRY }}
+          registry: harbor.arbina.com
           username: ${{ secrets.ARBINA_ECR_USERNAME }}
           password: ${{ secrets.ARBINA_ECR_PASSWORD }}
 
