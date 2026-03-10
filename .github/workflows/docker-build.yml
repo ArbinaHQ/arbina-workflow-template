@@ -14,7 +14,7 @@ on:
 
 jobs:
   api-multi-module-workflow:
-    runs-on: ubuntu-latest
+    runs-on: k8s-scale-runners
     steps:
       - uses: actions/checkout@v4
 
