@@ -98,7 +98,7 @@ jobs:
         id: login-ecr
         uses: docker/login-action@v3
         with:
-          registry: ${{ secrets.ARBINA_K8S_ECR_REGISTRY }}
+          registry: https://${{ secrets.ARBINA_K8S_ECR_REGISTRY }}
           username: ${{ secrets.ARBINA_ECR_USERNAME }}
           password: ${{ secrets.ARBINA_ECR_PASSWORD }}
 
