@@ -3,6 +3,11 @@ name: Reusable workflow. Used to build and push UI
 on:
   workflow_call:
     inputs:
+      MODULE_NAME:
+        description: "Using for choice specified module when build application. 
+                        If not present - used project directory for build and test"
+        default: .
+        type: string
       ECR_REPOSITORY:
         description: "Docker repository address"
         required: true
@@ -34,12 +39,18 @@ on:
     secrets:
       SECRET_GH_TOKEN_CAN_READ_PACKAGES:
         required: true
+      ARBINA_ECR_REGISTRY:
+        required: true
+      SECRET_ECR_USERNAME:
+        required: true
+      SECRET_ECR_PASSWORD:
+        required: true
       SECRET_IMAGE_TAG:
         required: true
 
 jobs:
   ui-build-and-push-to-ecr:
-    runs-on: k8s-scale-runners
+    runs-on: custom
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -47,20 +58,23 @@ jobs:
           node-version: ${{ inputs.NODE_VERSION }}
           registry-url: 'https://npm.pkg.github.com'
           scope: '@arbinahq'
-        
+
       - name: Add envs
         run: |
           echo ${{ inputs.GIT_REVISION_ENV_NAME }}=${{ secrets.SECRET_IMAGE_TAG }} >> .env
           cat .env
-          
+        working-directory: ${{ inputs.MODULE_NAME }}
+
       - name: NPM install packages
         run: (rm .npmrc || true) && npm install
         env:
           NODE_AUTH_TOKEN: ${{ secrets.SECRET_GH_TOKEN_CAN_READ_PACKAGES }}
-                  
+        working-directory: ${{ inputs.MODULE_NAME }}
+
       - name: NPM build
         run: npm run build
         if: ${{ inputs.IS_BUILD_ENABLED }}
+        working-directory: ${{ inputs.MODULE_NAME }}
 
       - name: Login to ECR
         if: ${{ inputs.IS_ECR_PUSH_ENABLED }}
