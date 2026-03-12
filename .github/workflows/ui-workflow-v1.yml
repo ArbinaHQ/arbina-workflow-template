@@ -36,17 +36,6 @@ on:
         required: false
         type: string
         default: '16'
-    secrets:
-      SECRET_GH_TOKEN_CAN_READ_PACKAGES:
-        required: true
-      ARBINA_ECR_REGISTRY:
-        required: true
-      ARBINA_ECR_USERNAME:
-        required: true
-      ARBINA_ECR_PASSWORD:
-        required: true
-      SECRET_IMAGE_TAG:
-        required: true
 
 jobs:
   ui-build-and-push-to-ecr:
@@ -61,14 +50,14 @@ jobs:
 
       - name: Add envs
         run: |
-          echo ${{ inputs.GIT_REVISION_ENV_NAME }}=${{ secrets.SECRET_IMAGE_TAG }} >> .env
+          echo ${{ inputs.GIT_REVISION_ENV_NAME }}=${{ github.sha }} >> .env
           cat .env
         working-directory: ${{ inputs.MODULE_NAME }}
 
       - name: NPM install packages
         run: (rm .npmrc || true) && npm install
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.SECRET_GH_TOKEN_CAN_READ_PACKAGES }}
+          NODE_AUTH_TOKEN: ${{ secrets.GH_TOKEN_CAN_READ_PACKAGES }}
         working-directory: ${{ inputs.MODULE_NAME }}
 
       - name: NPM build
@@ -92,8 +81,8 @@ jobs:
           context: ${{ inputs.MODULE_NAME }}
           push: true
           tags: |
-            ${{ secrets.ARBINA_ECR_REGISTRY }}/${{ inputs.ECR_REPOSITORY }}:${{ secrets.SECRET_IMAGE_TAG }}
+            ${{ secrets.ARBINA_ECR_REGISTRY }}/${{ inputs.ECR_REPOSITORY }}:${{ github.sha }}
             ${{ secrets.ARBINA_ECR_REGISTRY }}/${{ inputs.ECR_REPOSITORY }}:${{ inputs.IMAGE_TAG_ECR }}
           build-args: |
-            IMAGE_TAG=${{ secrets.SECRET_IMAGE_TAG }}
-            NODE_AUTH_TOKEN=${{ secrets.SECRET_GH_TOKEN_CAN_READ_PACKAGES }}
+            IMAGE_TAG=${{ github.sha }}
+            NODE_AUTH_TOKEN=${{ secrets.GH_TOKEN_CAN_READ_PACKAGES }}
