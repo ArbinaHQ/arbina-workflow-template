@@ -89,7 +89,7 @@ jobs:
         if: ${{ inputs.IS_ECR_PUSH_ENABLED }}
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: ${{ inputs.MODULE_NAME }}
           push: true
           tags: |
             ${{ secrets.ARBINA_ECR_REGISTRY }}/${{ inputs.ECR_REPOSITORY }}:${{ secrets.SECRET_IMAGE_TAG }}
