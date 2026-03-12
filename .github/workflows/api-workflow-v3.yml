@@ -53,6 +53,7 @@ jobs:
     runs-on: k8s-scale-runners
     steps:
       - uses: actions/checkout@v4
+
       - name: Set up JDK ${{ inputs.JAVA_VERSION }}
         uses: actions/setup-java@v4
         with:
@@ -71,7 +72,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN_CAN_READ_PACKAGES || secrets.GH_DEPBOT_TOKEN_CAN_READ_PACKAGES }}
           GITHUB_USERNAME: ${{ secrets.GH_USER_CAN_READ_PACKAGES || secrets.GH_DEPBOT_USER_CAN_READ_PACKAGES }}
-          BOOT_JAR_NAME : ${{ inputs.BOOT_JAR_NAME }}
+          BOOT_JAR_NAME: ${{ inputs.BOOT_JAR_NAME }}
         run: gradle bootJar -p ${{ inputs.MODULE_NAME }} --parallel --no-daemon
 
       - name: Build and test application
@@ -79,7 +80,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN_CAN_READ_PACKAGES || secrets.GH_DEPBOT_TOKEN_CAN_READ_PACKAGES }}
           GITHUB_USERNAME: ${{ secrets.GH_USER_CAN_READ_PACKAGES || secrets.GH_DEPBOT_USER_CAN_READ_PACKAGES }}
-          BOOT_JAR_NAME : ${{ inputs.BOOT_JAR_NAME }}
+          BOOT_JAR_NAME: ${{ inputs.BOOT_JAR_NAME }}
         run: gradle bootJar test -p ${{ inputs.MODULE_NAME }} --parallel --no-daemon
 
       - name: Copy docker directory
@@ -103,15 +104,15 @@ jobs:
 
       - name: Build, tag, and push image to ECR
         if: ${{ inputs.IS_ECR_PUSH_ENABLED }}
-        env:
-          ECR_REGISTRY: ${{ secrets.ARBINA_K8S_ECR_REGISTRY }}/prod
-          ECR_REPOSITORY: ${{ inputs.ECR_REPOSITORY }}
-          IMAGE_TAG: ${{ github.sha }}
-          BOOT_JAR_NAME: ${{ inputs.BOOT_JAR_NAME }}
-          SPRING_BOOT_LOADER: ${{ inputs.SPRING_BOOT_LOADER }}
-          JAVA_VERSION: ${{ inputs.JAVA_VERSION }}
-        run: |
-          docker build --build-arg=IMAGE_TAG=$IMAGE_TAG --build-arg=JAVA_VERSION=$JAVA_VERSION --build-arg=BOOT_JAR_NAME=$BOOT_JAR_NAME --build-arg=SPRING_BOOT_LOADER=$SPRING_BOOT_LOADER -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-        working-directory: ${{ inputs.MODULE_NAME }}
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ inputs.MODULE_NAME }}
+          push: true
+          tags: |
+            ${{ secrets.ARBINA_K8S_ECR_REGISTRY }}/prod/${{ inputs.ECR_REPOSITORY }}:${{ github.sha }}
+            ${{ secrets.ARBINA_K8S_ECR_REGISTRY }}/prod/${{ inputs.ECR_REPOSITORY }}:latest
+          build-args: |
+            IMAGE_TAG=${{ github.sha }}
+            JAVA_VERSION=${{ inputs.JAVA_VERSION }}
+            BOOT_JAR_NAME=${{ inputs.BOOT_JAR_NAME }}
+            SPRING_BOOT_LOADER=${{ inputs.SPRING_BOOT_LOADER }}
