@@ -78,7 +78,7 @@ jobs:
         if: ${{ inputs.IS_ECR_PUSH_ENABLED }}
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: ${{ inputs.MODULE_NAME }}
           push: true
           tags: |
             ${{ secrets.ARBINA_K8S_ECR_REGISTRY }}/prod/${{ inputs.ECR_REPOSITORY }}:${{ github.sha }}
