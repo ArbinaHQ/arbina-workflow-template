@@ -39,11 +39,11 @@ on:
     secrets:
       SECRET_GH_TOKEN_CAN_READ_PACKAGES:
         required: true
-      SECRET_ECR_REGISTRY:
+      ARBINA_K8S_ECR_REGISTRY:
         required: true
-      SECRET_ECR_USERNAME:
+      ARBINA_ECR_USERNAME:
         required: true
-      SECRET_ECR_PASSWORD:
+      ARBINA_ECR_PASSWORD:
         required: true
       SECRET_IMAGE_TAG:
         required: true

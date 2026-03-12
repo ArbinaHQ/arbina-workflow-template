@@ -41,9 +41,9 @@ on:
         required: true
       ARBINA_ECR_REGISTRY:
         required: true
-      SECRET_ECR_USERNAME:
+      ARBINA_ECR_USERNAME:
         required: true
-      SECRET_ECR_PASSWORD:
+      ARBINA_ECR_PASSWORD:
         required: true
       SECRET_IMAGE_TAG:
         required: true
