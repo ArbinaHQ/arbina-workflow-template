@@ -85,12 +85,12 @@ jobs:
 
       - name: Copy docker directory
         if: ${{ inputs.IS_COPY_DOCKER_DIRECTORY }}
-        run: cp -r /docker/api-v1/docker ./
+        run: cp -r /docker/api-v2/docker ./
         working-directory: ${{ inputs.MODULE_NAME }}
 
       - name: Copy dockerfile
         if: ${{ inputs.IS_COPY_DOCKERFILE }}
-        run: cp /docker/api-v1/Dockerfile ./
+        run: cp /docker/api-v2/Dockerfile ./
         working-directory: ${{ inputs.MODULE_NAME }}
 
       - name: Login to ECR
