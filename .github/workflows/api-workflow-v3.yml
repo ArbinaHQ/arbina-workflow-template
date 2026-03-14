@@ -60,11 +60,18 @@ jobs:
           java-version: ${{ inputs.JAVA_VERSION }}
           distribution: 'zulu'
 
+      - name: Cache Gradle wrapper
+        uses: actions/cache@v5
+        with:
+          path: ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-wrapper-${{ inputs.GRADLE_VERSION }}
+
       - name: Setup Gradle ${{ inputs.GRADLE_VERSION }}
         uses: gradle/actions/setup-gradle@v5
         with:
           gradle-version: ${{ inputs.GRADLE_VERSION }}
-          cache-read-only: true
+          cache-read-only: false
+          cache-disabled: false
 
       - name: Build application
         if: ${{ !inputs.IS_TEST_ENABLED }}
