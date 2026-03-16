@@ -56,6 +56,25 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Build and test application in Docker
+        if: ${{ inputs.IS_TEST_ENABLED }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_CAN_READ_PACKAGES || secrets.GH_DEPBOT_TOKEN_CAN_READ_PACKAGES }}
+          GITHUB_USERNAME: ${{ secrets.GH_USER_CAN_READ_PACKAGES || secrets.GH_DEPBOT_USER_CAN_READ_PACKAGES }}
+        run: |
+          docker run --rm \
+            --volume "${{ github.workspace }}:/workspace" \
+            --volume /var/run/docker.sock:/var/run/docker.sock \
+            --workdir "/workspace/${{ inputs.MODULE_NAME }}" \
+            --add-host host.docker.internal:host-gateway \
+            --env GITHUB_TOKEN \
+            --env GITHUB_USERNAME \
+            --env BOOT_JAR_NAME=${{ inputs.BOOT_JAR_NAME }} \
+            --env TESTCONTAINERS_HOST_OVERRIDE=host.docker.internal \
+            --env GRADLE_USER_HOME=/workspace/.gradle \
+            ${{ secrets.ARBINA_K8S_ECR_REGISTRY }}/prod/arbina-gradle-jdk:${{ inputs.JAVA_VERSION }} \
+            gradle bootJar test --parallel --no-daemon
+
       - name: Copy docker directory
         if: ${{ inputs.IS_COPY_DOCKER_DIRECTORY }}
         run: cp -r /docker/api-v3/docker ./
