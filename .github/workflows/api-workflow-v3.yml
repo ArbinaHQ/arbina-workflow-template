@@ -21,7 +21,7 @@ on:
         required: true
         type: boolean
       IS_ECR_PUSH_ENABLED:
-        description: "Using for disable pushing to ECR if value is true."
+        description: "Using for pushing to ECR if value is true."
         required: true
         type: boolean
       IS_COPY_DOCKERFILE:
@@ -53,18 +53,14 @@ jobs:
     runs-on: k8s-scale-runners
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
 
       - name: Set up JDK ${{ inputs.JAVA_VERSION }}
         uses: actions/setup-java@v5
         with:
           java-version: ${{ inputs.JAVA_VERSION }}
           distribution: 'zulu'
-
-      - name: Cache Gradle wrapper
-        uses: actions/cache@v5
-        with:
-          path: ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-wrapper-${{ inputs.GRADLE_VERSION }}
 
       - name: Setup Gradle ${{ inputs.GRADLE_VERSION }}
         uses: gradle/actions/setup-gradle@v5
@@ -73,21 +69,12 @@ jobs:
           cache-read-only: false
           cache-disabled: false
 
-      - name: Build application
-        if: ${{ !inputs.IS_TEST_ENABLED }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_CAN_READ_PACKAGES || secrets.GH_DEPBOT_TOKEN_CAN_READ_PACKAGES }}
-          GITHUB_USERNAME: ${{ secrets.GH_USER_CAN_READ_PACKAGES || secrets.GH_DEPBOT_USER_CAN_READ_PACKAGES }}
-          BOOT_JAR_NAME: ${{ inputs.BOOT_JAR_NAME }}
-        run: gradle bootJar -p ${{ inputs.MODULE_NAME }} --parallel --no-daemon
-
       - name: Build and test application
-        if: ${{ inputs.IS_TEST_ENABLED }}
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN_CAN_READ_PACKAGES || secrets.GH_DEPBOT_TOKEN_CAN_READ_PACKAGES }}
           GITHUB_USERNAME: ${{ secrets.GH_USER_CAN_READ_PACKAGES || secrets.GH_DEPBOT_USER_CAN_READ_PACKAGES }}
           BOOT_JAR_NAME: ${{ inputs.BOOT_JAR_NAME }}
-        run: gradle bootJar test -p ${{ inputs.MODULE_NAME }} --parallel --no-daemon
+        run: gradle ${{ inputs.IS_TEST_ENABLED && 'bootJar test' || 'bootJar' }} -p ${{ inputs.MODULE_NAME }} --parallel --no-daemon
 
       - name: Copy docker directory
         if: ${{ inputs.IS_COPY_DOCKER_DIRECTORY }}
@@ -104,7 +91,7 @@ jobs:
         id: login-ecr
         uses: docker/login-action@v4
         with:
-          registry: https://${{ secrets.ARBINA_K8S_ECR_REGISTRY }}
+          registry: ${{ secrets.ARBINA_K8S_ECR_REGISTRY }}
           username: ${{ secrets.ARBINA_ECR_USERNAME }}
           password: ${{ secrets.ARBINA_ECR_PASSWORD }}
 
