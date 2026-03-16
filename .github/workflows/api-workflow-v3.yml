@@ -67,7 +67,7 @@ jobs:
         with:
           gradle-version: ${{ inputs.GRADLE_VERSION }}
 #          cache-read-only: false
-#          cache-disabled: false
+          cache-disabled: true
 
       - name: Build and test application
         env:
