@@ -96,8 +96,7 @@ jobs:
           ./gradlew ${{ inputs.IS_TEST_ENABLED && 'bootJar test' || 'bootJar' }} \
             -p ${{ inputs.MODULE_NAME }} \
             --parallel \
-            --no-daemon \
-            --build-cache
+            --no-daemon
 
       - name: Copy docker directory
         if: ${{ inputs.IS_COPY_DOCKER_DIRECTORY }}
