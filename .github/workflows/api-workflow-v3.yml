@@ -76,11 +76,11 @@ jobs:
 #          BOOT_JAR_NAME: ${{ inputs.BOOT_JAR_NAME }}
 #        run: gradle ${{ inputs.IS_TEST_ENABLED && 'bootJar test' || 'bootJar' }} -p ${{ inputs.MODULE_NAME }} --parallel --no-daemon
 
-      - name: Setup Gradle ${{ inputs.GRADLE_VERSION }}
-        uses: gradle/actions/setup-gradle@v5
-        with:
-          cache-read-only: false
-          cache-disabled: false
+#      - name: Setup Gradle ${{ inputs.GRADLE_VERSION }}
+#        uses: gradle/actions/setup-gradle@v5
+#        with:
+#          cache-read-only: false
+#          cache-disabled: false
 
       - name: Build and test application
         env:
