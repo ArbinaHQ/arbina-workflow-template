@@ -66,8 +66,8 @@ jobs:
         uses: gradle/actions/setup-gradle@v5
         with:
           gradle-version: ${{ inputs.GRADLE_VERSION }}
-#          cache-read-only: false
-          cache-disabled: true
+          cache-read-only: false
+          cache-disabled: false
 
       - name: Build and test application
         env:
