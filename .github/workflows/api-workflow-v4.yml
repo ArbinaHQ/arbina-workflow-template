@@ -37,11 +37,6 @@ on:
         default: "25"
         required: false
         type: string
-      GRADLE_VERSION:
-        description: "Using for set version Gradle in build"
-        default: "9.4.0"
-        required: false
-        type: string
       SPRING_BOOT_LOADER:
         description: "Used for run spring boot application"
         default: "org.springframework.boot.loader.launch.JarLauncher"
@@ -74,18 +69,6 @@ jobs:
         with:
           java-version: ${{ inputs.JAVA_VERSION }}
           distribution: 'zulu'
-
-#      - name: Setup Gradle
-#        uses: gradle/actions/setup-gradle@v5
-#        with:
-##          cache-read-only: false
-#          cache-disabled: true
-##          # Encrypt cached configuration-cache data — essential for shared K8s runners
-##          cache-encryption-key: ${{ secrets.GRADLE_CACHE_ENCRYPTION_KEY }}
-##          # Remove stale/unused entries before saving — keeps GHA cache lean
-##          cache-cleanup: 'always'
-##          # Show build summary only on failure to reduce log noise
-##          add-job-summary: 'on-failure'
 
       - name: Build and test application
         env:
