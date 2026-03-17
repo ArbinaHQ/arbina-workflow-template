@@ -77,15 +77,15 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
-        with:
-          cache-read-only: false
-          cache-disabled: false
-          # Encrypt cached configuration-cache data — essential for shared K8s runners
-          cache-encryption-key: ${{ secrets.GRADLE_CACHE_ENCRYPTION_KEY }}
-          # Remove stale/unused entries before saving — keeps GHA cache lean
-          cache-cleanup: 'always'
-          # Show build summary only on failure to reduce log noise
-          add-job-summary: 'on-failure'
+#        with:
+#          cache-read-only: false
+#          cache-disabled: false
+#          # Encrypt cached configuration-cache data — essential for shared K8s runners
+#          cache-encryption-key: ${{ secrets.GRADLE_CACHE_ENCRYPTION_KEY }}
+#          # Remove stale/unused entries before saving — keeps GHA cache lean
+#          cache-cleanup: 'always'
+#          # Show build summary only on failure to reduce log noise
+#          add-job-summary: 'on-failure'
 
       - name: Build and test application
         env:
