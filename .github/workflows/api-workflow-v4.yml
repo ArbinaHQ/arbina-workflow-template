@@ -75,10 +75,9 @@ jobs:
           java-version: ${{ inputs.JAVA_VERSION }}
           distribution: 'zulu'
 
-      - name: Setup Gradle ${{ inputs.GRADLE_VERSION }}
+      - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
         with:
-          gradle-version: ${{ inputs.GRADLE_VERSION }}
           cache-read-only: false
           cache-disabled: false
           # Encrypt cached configuration-cache data — essential for shared K8s runners
@@ -94,7 +93,7 @@ jobs:
           GITHUB_USERNAME: ${{ secrets.GH_USER_CAN_READ_PACKAGES || secrets.GH_DEPBOT_USER_CAN_READ_PACKAGES }}
           BOOT_JAR_NAME: ${{ inputs.BOOT_JAR_NAME }}
         run: |
-          gradle ${{ inputs.IS_TEST_ENABLED && 'bootJar test' || 'bootJar' }} \
+          ./gradlew ${{ inputs.IS_TEST_ENABLED && 'bootJar test' || 'bootJar' }} \
             -p ${{ inputs.MODULE_NAME }} \
             --parallel \
             --no-daemon \
