@@ -16,7 +16,7 @@ on:
 
 jobs:
   api-test-module-workflow:
-    runs-on: custom
+    runs-on: k8s-scale-runners
     steps:
       - uses: actions/checkout@v4
         with:

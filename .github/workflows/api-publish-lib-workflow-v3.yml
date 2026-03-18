@@ -20,7 +20,7 @@ on:
 
 jobs:
   api-lib-publish:
-    runs-on: custom
+    runs-on: k8s-scale-runners
     steps:
       - uses: actions/checkout@v4
         with:
