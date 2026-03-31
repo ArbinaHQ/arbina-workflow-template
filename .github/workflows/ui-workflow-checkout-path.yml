@@ -3,11 +3,6 @@ name: Reusable workflow. Used to build and push UI wiych checkout needed path
 on:
   workflow_call:
     inputs:
-      MODULE_NAME:
-        description: "Using for choice specified module when build application. 
-                        If not present - used project directory for build and test"
-        default: .
-        type: string
       ECR_REPOSITORY:
         description: "Docker repository address"
         required: true
@@ -60,18 +55,18 @@ jobs:
         run: |
           echo ${{ inputs.GIT_REVISION_ENV_NAME }}=${{ github.sha }} >> .env
           cat .env
-        working-directory: ${{ inputs.MODULE_NAME }}
+        working-directory: ${{ inputs.CHECKOUT_PATH }}
 
       - name: NPM install packages
         run: (rm .npmrc || true) && npm install
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GH_TOKEN_CAN_READ_PACKAGES }}
-        working-directory: ${{ inputs.MODULE_NAME }}
+        working-directory: ${{ inputs.CHECKOUT_PATH }}
 
       - name: NPM build
         run: npm run build
         if: ${{ inputs.IS_BUILD_ENABLED }}
-        working-directory: ${{ inputs.MODULE_NAME }}
+        working-directory: ${{ inputs.CHECKOUT_PATH }}
 
       - name: Login to ECR
         if: ${{ inputs.IS_ECR_PUSH_ENABLED }}
@@ -86,7 +81,7 @@ jobs:
         if: ${{ inputs.IS_ECR_PUSH_ENABLED }}
         uses: docker/build-push-action@v6
         with:
-          context: ${{ inputs.MODULE_NAME }}
+          context: ${{ inputs.CHECKOUT_PATH }}
           push: true
           tags: |
             ${{ secrets.ARBINA_K8S_ECR_REGISTRY }}/prod/${{ inputs.ECR_REPOSITORY }}:${{ github.sha }}
