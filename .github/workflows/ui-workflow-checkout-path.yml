@@ -1,8 +1,13 @@
-name: Reusable workflow. Used to build and push UI with path checkout for building in subprojects.
+name: Reusable workflow. Used to build and push UI wiych checkout needed path
 
 on:
   workflow_call:
     inputs:
+      MODULE_NAME:
+        description: "Using for choice specified module when build application. 
+                        If not present - used project directory for build and test"
+        default: .
+        type: string
       ECR_REPOSITORY:
         description: "Docker repository address"
         required: true
@@ -32,51 +37,41 @@ on:
         type: string
         default: '16'
       CHECKOUT_PATH:
-        description: "Path to checkout"
+        description: "Path to needed checkout"
         required: true
         type: string
-    secrets:
-      SECRET_GH_TOKEN_CAN_READ_PACKAGES:
-        required: true
-      SECRET_ECR_REGISTRY:
-        required: true
-      SECRET_ECR_USERNAME:
-        required: true
-      SECRET_ECR_PASSWORD:
-        required: true
-      SECRET_IMAGE_TAG:
-        required: true
-
+        
 jobs:
   ui-build-and-push-to-ecr:
     runs-on: k8s-scale-runners
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
         with:
           sparse-checkout: ${{ inputs.CHECKOUT_PATH }}
           sparse-checkout-cone-mode: false
           
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.NODE_VERSION }}
           registry-url: 'https://npm.pkg.github.com'
           scope: '@arbinahq'
-        
+
       - name: Add envs
         run: |
-          echo ${{ inputs.GIT_REVISION_ENV_NAME }}=${{ secrets.SECRET_IMAGE_TAG }} >> .env
+          echo ${{ inputs.GIT_REVISION_ENV_NAME }}=${{ github.sha }} >> .env
           cat .env
-          
+        working-directory: ${{ inputs.MODULE_NAME }}
+
       - name: NPM install packages
         run: (rm .npmrc || true) && npm install
-        working-directory: ${{ inputs.CHECKOUT_PATH }}
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.SECRET_GH_TOKEN_CAN_READ_PACKAGES }}
-                  
+          NODE_AUTH_TOKEN: ${{ secrets.GH_TOKEN_CAN_READ_PACKAGES }}
+        working-directory: ${{ inputs.MODULE_NAME }}
+
       - name: NPM build
         run: npm run build
-        working-directory: ${{ inputs.CHECKOUT_PATH }}
         if: ${{ inputs.IS_BUILD_ENABLED }}
+        working-directory: ${{ inputs.MODULE_NAME }}
 
       - name: Login to ECR
         if: ${{ inputs.IS_ECR_PUSH_ENABLED }}
@@ -91,7 +86,7 @@ jobs:
         if: ${{ inputs.IS_ECR_PUSH_ENABLED }}
         uses: docker/build-push-action@v6
         with:
-          context: ${{ inputs.CHECKOUT_PATH }}
+          context: ${{ inputs.MODULE_NAME }}
           push: true
           tags: |
             ${{ secrets.ARBINA_K8S_ECR_REGISTRY }}/prod/${{ inputs.ECR_REPOSITORY }}:${{ github.sha }}
