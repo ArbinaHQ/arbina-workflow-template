@@ -55,7 +55,7 @@ jobs:
         working-directory: ${{ inputs.MODULE_NAME }}
 
       - name: NPM install packages
-        run: (rm .npmrc || true) && npm install
+        run: rm -f .npmrc && npm install
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GH_TOKEN_CAN_READ_PACKAGES }}
         working-directory: ${{ inputs.MODULE_NAME }}
