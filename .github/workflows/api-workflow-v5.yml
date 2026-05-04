@@ -109,9 +109,9 @@ jobs:
         id: login-ecr
         uses: docker/login-action@v4
         with:
-          registry: ${{ ECR_REGISTRY }}
-          username: ${{ ECR_USERNAME }}
-          password: ${{ ECR_PASSWORD }}
+          registry: ${{ env.ECR_REGISTRY }}
+          username: ${{ env.ECR_USERNAME }}
+          password: ${{ env.ECR_PASSWORD }}
 
       - name: Build, tag, and push image to ECR
         if: ${{ inputs.IS_ECR_PUSH_ENABLED }}
@@ -120,17 +120,17 @@ jobs:
           context: ${{ inputs.MODULE_NAME }}
           push: true
           tags: |
-            ${{ ECR_REGISTRY }}/prod/${{ inputs.ECR_REPOSITORY }}:${{ github.sha }}
-            ${{ ECR_REGISTRY }}/prod/${{ inputs.ECR_REPOSITORY }}:latest
+            ${{ env.ECR_REGISTRY }}/prod/${{ inputs.ECR_REPOSITORY }}:${{ github.sha }}
+            ${{ env.ECR_REGISTRY }}/prod/${{ inputs.ECR_REPOSITORY }}:latest
           build-args: |
             IMAGE_TAG=${{ github.sha }}
             JAVA_VERSION=${{ inputs.JAVA_VERSION }}
             BOOT_JAR_NAME=${{ inputs.BOOT_JAR_NAME }}
             SPRING_BOOT_LOADER=${{ inputs.SPRING_BOOT_LOADER }}
-            ECR_REGISTRY=${{ ECR_REGISTRY }}/prod
+            ECR_REGISTRY=${{ env.ECR_REGISTRY }}/prod
           # Registry-based cache: layers stored in ECR, NOT in GHA cache (10GB limited).
           # Ephemeral runners have no local Docker cache — this makes rebuilds fast without filling GHA quota.
-          cache-from: type=registry,ref=${{ ECR_REGISTRY }}/prod/${{ inputs.ECR_REPOSITORY }}:buildcache
-          cache-to: type=registry,ref=${{ ECR_REGISTRY }}/prod/${{ inputs.ECR_REPOSITORY }}:buildcache,mode=max,image-manifest=true,compression=zstd
+          cache-from: type=registry,ref=${{ env.ECR_REGISTRY }}/prod/${{ inputs.ECR_REPOSITORY }}:buildcache
+          cache-to: type=registry,ref=${{ env.ECR_REGISTRY }}/prod/${{ inputs.ECR_REPOSITORY }}:buildcache,mode=max,image-manifest=true,compression=zstd
           # Disable provenance attestation — avoids multi-platform manifest overhead on single-arch builds
           provenance: false
