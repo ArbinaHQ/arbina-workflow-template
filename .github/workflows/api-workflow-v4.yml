@@ -3,6 +3,11 @@ name: "Reusable workflow v4. Ultimate K8s ephemeral runner: build, test and push
 on:
   workflow_call:
     inputs:
+      WORKFLOW_WORKING_DIRECTORY:
+        description: "Using for choice specified working directory when build application. 
+                        If not present - used project directory for build and test"
+        default: .
+        type: string
       MODULE_NAME:
         description: "Using for choice specified module when build application. 
                         If not present - used project directory for build and test"
@@ -77,6 +82,7 @@ jobs:
           BOOT_JAR_NAME: ${{ inputs.BOOT_JAR_NAME }}
         run: |
           ./gradlew ${{ inputs.IS_TEST_ENABLED && 'bootJar test' || 'bootJar' }} -p ${{ inputs.MODULE_NAME }} --parallel --no-daemon --build-cache
+        working-directory: ${{ inputs.WORKFLOW_WORKING_DIRECTORY }}
 
       - name: Copy docker directory
         if: ${{ inputs.IS_COPY_DOCKER_DIRECTORY }}
