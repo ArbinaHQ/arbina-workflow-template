@@ -81,7 +81,7 @@ jobs:
           GITHUB_USERNAME: ${{ secrets.GH_USER_CAN_READ_PACKAGES || secrets.GH_DEPBOT_USER_CAN_READ_PACKAGES }}
           BOOT_JAR_NAME: ${{ inputs.BOOT_JAR_NAME }}
         run: |
-          ./gradlew ${{ inputs.IS_TEST_ENABLED && 'bootJar test' || 'bootJar' }} -p ${{ inputs.MODULE_NAME }} --parallel --no-daemon --build-cache
+          ${{ inputs.WORKFLOW_WORKING_DIRECTORY }}/gradlew ${{ inputs.IS_TEST_ENABLED && 'bootJar test' || 'bootJar' }} -p ${{ inputs.MODULE_NAME }} --parallel --no-daemon --build-cache
         working-directory: ${{ inputs.WORKFLOW_WORKING_DIRECTORY }}
 
       - name: Copy docker directory
