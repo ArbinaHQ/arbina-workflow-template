@@ -3,16 +3,15 @@ name: "Reusable workflow v4. Ultimate K8s ephemeral runner: build, test and push
 on:
   workflow_call:
     inputs:
-      WORKFLOW_WORKING_DIRECTORY:
-        description: "Using for choice specified working directory when build application. 
-                        If not present - used project directory for build and test"
-        default: .
+      GRADLEW_DIRECTORY:
+        description: "Using for specify gradlew directory"
         type: string
+        default: .
       MODULE_NAME:
         description: "Using for choice specified module when build application. 
                         If not present - used project directory for build and test"
-        default: .
         type: string
+        default: .
       ECR_REPOSITORY:
         description: "Using for deploy docker image to ECR"
         required: true
@@ -39,14 +38,14 @@ on:
         type: boolean
       JAVA_VERSION:
         description: "Using for set version Java in build"
-        default: "25"
         required: false
         type: string
+        default: "25"
       SPRING_BOOT_LOADER:
         description: "Used for run spring boot application"
-        default: "org.springframework.boot.loader.launch.JarLauncher"
         required: false
         type: string
+        default: "org.springframework.boot.loader.launch.JarLauncher"
 
 jobs:
   api-multi-module-workflow:
@@ -82,7 +81,6 @@ jobs:
           BOOT_JAR_NAME: ${{ inputs.BOOT_JAR_NAME }}
         run: |
           ${{ inputs.WORKFLOW_WORKING_DIRECTORY }}/gradlew ${{ inputs.IS_TEST_ENABLED && 'bootJar test' || 'bootJar' }} -p ${{ inputs.MODULE_NAME }} --parallel --no-daemon --build-cache
-        working-directory: ${{ inputs.WORKFLOW_WORKING_DIRECTORY }}
 
       - name: Copy docker directory
         if: ${{ inputs.IS_COPY_DOCKER_DIRECTORY }}
