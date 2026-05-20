@@ -31,5 +31,5 @@ jobs:
       - name: Test application with Gradle
         run: ./gradlew test -p ${{ inputs.MODULE_NAME }} --parallel
         env:
-          GITHUB_TOKEN: ${{ secrets.GITEA_TOKEN_CAN_READ_PACKAGES }}
-          GITHUB_USERNAME: ${{ secrets.GITEA_USER_PACKAGES }}
+          GITEA_TOKEN: ${{ secrets.GITEA_TOKEN_CAN_READ_PACKAGES }}
+          GITEA_USERNAME: ${{ secrets.GITEA_USER_PACKAGES }}
