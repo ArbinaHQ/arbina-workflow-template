@@ -76,8 +76,8 @@ jobs:
 
       - name: Build and test application
         env:
-          GITEA_TOKEN: ${{ secrets.GITEA_USERNAME }}
-          GITEA_USERNAME: ${{ secrets.GITEA_TOKEN_RO_PACKAGES }}
+          GITEA_TOKEN: ${{ secrets.GITEA_TOKEN_RO_PACKAGES }}
+          GITEA_USERNAME: ${{ secrets.GITEA_USERNAME }}
           BOOT_JAR_NAME: ${{ inputs.BOOT_JAR_NAME }}
         run: |
           ${{ inputs.GRADLEW_DIRECTORY }}/gradlew ${{ inputs.IS_TEST_ENABLED && 'bootJar test' || 'bootJar' }} -p ${{ inputs.MODULE_NAME }} --parallel --no-daemon --build-cache
