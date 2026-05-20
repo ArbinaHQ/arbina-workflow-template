@@ -31,5 +31,5 @@ jobs:
       - name: Test application with Gradle
         run: ./gradlew test -p ${{ inputs.MODULE_NAME }} --parallel
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_CAN_READ_PACKAGES || secrets.GH_DEPBOT_TOKEN_CAN_READ_PACKAGES }}
-          GITHUB_USERNAME: ${{ secrets.GH_USER_CAN_READ_PACKAGES || secrets.GH_DEPBOT_USER_CAN_READ_PACKAGES }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_CAN_READ_PACKAGES }}
+          GITHUB_USERNAME: ${{ secrets.GH_USER_CAN_READ_PACKAGES }}
