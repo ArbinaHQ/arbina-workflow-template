@@ -1,0 +1,39 @@
+name: Reusable workflow. Using to build and publish lib to GitHub Packages
+
+on:
+  workflow_call:
+    inputs:
+      MODULE_NAME:
+        description: "Using for choice specified module when build application. 
+                        If not present - used project directory for build and test"
+        default: .
+        type: string
+      IS_TEST_ENABLED:
+        description: "Using for start test before pushing if value is true."
+        default: false
+        type: boolean
+      JAVA_VERSION:
+        description: "Using for set version Java in build"
+        default: "25"
+        required: false
+        type: string
+
+jobs:
+  api-lib-publish:
+    runs-on: k8s-scale-runners
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up JDK ${{ inputs.JAVA_VERSION }}
+        uses: actions/setup-java@v5
+        with:
+          java-version: ${{ inputs.JAVA_VERSION }}
+          distribution: 'zulu'
+
+      - name: Publish package
+        run: ./gradlew ${{ inputs.IS_TEST_ENABLED && 'test publish' || 'publish' }} publish -p ${{ inputs.MODULE_NAME }} --parallel
+        env:
+          GITEA_TOKEN: ${{ secrets.GITEA_TOKEN_RW_PACKAGES_AND_REPO }}
+          GITEA_USERNAME: ${{ secrets.GITEA_USERNAME }}
