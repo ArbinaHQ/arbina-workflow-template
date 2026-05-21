@@ -33,7 +33,7 @@ jobs:
           distribution: 'zulu'
 
       - name: Publish package
-        run: ./gradlew ${{ inputs.IS_TEST_ENABLED && 'test publish' || 'publish' }} publish -p ${{ inputs.MODULE_NAME }} --parallel
+        run: ./gradlew ${{ inputs.IS_TEST_ENABLED && 'test publish' || 'publish' }} -p ${{ inputs.MODULE_NAME }} --parallel
         env:
           GITEA_TOKEN: ${{ secrets.GITEA_TOKEN_RW_PACKAGES_AND_REPO }}
           GITEA_USERNAME: ${{ secrets.GITEA_USERNAME }}
