@@ -1,4 +1,4 @@
-name: Reusable workflow. Using to build and publish lib to GitHub Packages
+name: Reusable workflow. Using to build and publish lib package manager
 
 on:
   workflow_call:
