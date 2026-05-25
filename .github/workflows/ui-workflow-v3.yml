@@ -7,8 +7,11 @@ name: Reusable workflow v3. Build & push UI image
 #   * Default Node 22 (LTS in 2026) instead of 16 (EOL).
 #   * Default registry switched from GitHub Packages to Gitea private registry.
 #   * Default `GIT_REVISION` env name (without legacy `REACT_` prefix; callers can override).
-#   * gha cache for Docker layers + npm cache via setup-node.
 #   * `IS_BUILD_ENABLED: false` now skips the whole job, not just the CI step that nobody used.
+#
+# Caching: intentionally OFF. GHA cache I/O on the k8s-scale-runners turned out slower
+# than rebuilding from scratch (network roundtrip > local `npm ci`). If runners move
+# closer to GHA cache later, reintroduce `cache-from/cache-to: type=gha` on build-push.
 #
 # Required org secrets (used by default values below):
 #   GITEA_TOKEN_RO_PACKAGES       — ci-bot PAT, scope read:package; for `npm ci` in Dockerfile.
@@ -52,7 +55,7 @@ on:
         type: string
         default: latest
       NODE_VERSION:
-        description: "Node major version for actions/setup-node cache key. .nvmrc in the repo wins if present."
+        description: "Node major version installed on the runner via actions/setup-node. .nvmrc in the repo wins if present. Note: the Dockerfile picks its own Node base image independently."
         required: false
         type: string
         default: '22'
@@ -76,14 +79,11 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      # setup-node is only used to honor `.nvmrc` for any lint/test side steps a caller might
-      # add later — and to enable `cache: 'npm'`. It does NOT do `npm install` itself; that
-      # happens only inside Docker.
+      # setup-node only puts a Node binary on the runner for potential lint/test side
+      # steps callers may add later. The actual `npm ci` happens inside Docker, not here.
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ inputs.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: ${{ inputs.MODULE_NAME }}/package-lock.json
 
       - name: Stamp git revision into .env
         run: echo "${{ inputs.GIT_REVISION_ENV_NAME }}=${{ github.sha }}" >> .env
@@ -131,5 +131,3 @@ jobs:
           # Crucially: the secret is NOT baked into any layer.
           secret-files: |
             npmrc=/tmp/.npmrc
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
