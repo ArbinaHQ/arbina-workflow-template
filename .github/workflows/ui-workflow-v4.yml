@@ -100,7 +100,7 @@ jobs:
           build-args: |
             IMAGE_TAG=${{ github.sha }}
           secret-envs:
-            GITEA_TOKEN=${{ secrets.GITEA_TOKEN_RO_PACKAGES }}
-          # BuildKit secret — file mounted at /run/secrets/npmrc inside RUN steps
-          # that opt into it via `--mount=type=secret,id=npmrc,target=/root/.npmrc`.
+            GITEA_TOKEN=${{ secrets.GITEA_TOKEN_RO_PACKAGES || secrets.GITEA_TOKEN_CAN_READ_PACKAGES }}
+          # BuildKit secret — available as /run/secrets/GITEA_TOKEN inside RUN steps
+          # that opt into it via `--mount=type=secret,id=GITEA_TOKEN`.
           # Crucially: the secret is NOT baked into any layer.
