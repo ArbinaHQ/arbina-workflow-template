@@ -35,5 +35,7 @@ jobs:
       - name: Publish package
         run: ./gradlew ${{ inputs.IS_TEST_ENABLED && 'test publish' || 'publish' }} -p ${{ inputs.MODULE_NAME }} --parallel
         env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_CAN_READ_PACKAGES }}
+          GITHUB_USERNAME: ${{ secrets.GH_USER_CAN_READ_PACKAGES }}
           GITEA_TOKEN: ${{ secrets.GITEA_TOKEN_RW_PACKAGES_AND_REPO }}
           GITEA_USERNAME: ${{ secrets.GITEA_USERNAME }}

@@ -72,6 +72,8 @@ jobs:
 
       - name: Build and test application
         env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_CAN_READ_PACKAGES }}
+          GITHUB_USERNAME: ${{ secrets.GH_USER_CAN_READ_PACKAGES }}
           GITEA_TOKEN: ${{ secrets.GITEA_TOKEN_RO_PACKAGES }}
           GITEA_USERNAME: ${{ secrets.GITEA_USERNAME }}
           BOOT_JAR_NAME: ${{ inputs.BOOT_JAR_NAME }}
