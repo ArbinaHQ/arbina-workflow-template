@@ -11,6 +11,11 @@ on:
         description: "Using for disable pushing to ECR if value is true."
         required: true
         type: boolean
+      CONTEXT:
+        description: "Docker build context relative to repo root. Defaults to repo root."
+        required: false
+        type: string
+        default: '.'
 
 jobs:
   api-multi-module-workflow:
@@ -31,7 +36,7 @@ jobs:
         if:  ${{ inputs.IS_ECR_PUSH_ENABLED }}
         uses: docker/build-push-action@v7
         with:
-          context: .
+          context: ${{ inputs.CONTEXT }}
           push: true
           tags: |
             ${{ secrets.ARBINA_K8S_ECR_REGISTRY }}/prod/${{ inputs.ECR_REPOSITORY }}:${{ github.sha }}
