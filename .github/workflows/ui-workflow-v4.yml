@@ -99,6 +99,8 @@ jobs:
             ${{ secrets.ARBINA_K8S_ECR_REGISTRY }}/prod/${{ inputs.ECR_REPOSITORY }}:${{ inputs.IMAGE_TAG_ECR }}
           build-args: |
             IMAGE_TAG=${{ github.sha }}
+          secret-envs:
+            GITEA_TOKEN=${{ secrets.GITEA_TOKEN_RO_PACKAGES }}
           # BuildKit secret — file mounted at /run/secrets/npmrc inside RUN steps
           # that opt into it via `--mount=type=secret,id=npmrc,target=/root/.npmrc`.
           # Crucially: the secret is NOT baked into any layer.
