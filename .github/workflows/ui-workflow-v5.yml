@@ -70,6 +70,11 @@ on:
         required: false
         type: string
         default: node:24-alpine
+      NODE_VERSION:
+        description: "Node major version installed on the runner via actions/setup-node. .nvmrc in the repo wins if present. Note: the Dockerfile picks its own Node base image independently."
+        required: false
+        type: string
+        default: '24'
       BUILD_DIR:
         description: "[nginx-runner] Build output directory inside /app the Dockerfile copies to nginx. Default 'build' (CRA). Use 'dist' for Vite, 'public' for some webpack setups."
         required: false
