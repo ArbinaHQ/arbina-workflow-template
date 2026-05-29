@@ -94,10 +94,6 @@ jobs:
         run: cp /docker/api/Dockerfile ./
         working-directory: ${{ inputs.MODULE_NAME }}
 
-      - name: Set up Docker Buildx
-        if: ${{ inputs.IS_ECR_PUSH_ENABLED }}
-        uses: docker/setup-buildx-action@v4
-
       - name: Login to ECR
         if: ${{ inputs.IS_ECR_PUSH_ENABLED }}
         id: login-ecr
