@@ -117,7 +117,7 @@ jobs:
 
       - name: Copy docker directory
         if: ${{ inputs.IS_COPY_DOCKER_DIRECTORY }}
-        run: cp -r /docker/ui/docker ./
+        run: cp -rn /docker/ui/docker ./
         working-directory: ${{ inputs.MODULE_NAME }}
 
       - name: Copy dockerfile
