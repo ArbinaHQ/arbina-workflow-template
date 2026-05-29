@@ -49,17 +49,17 @@ on:
         description: "Copy unified Dockerfile from arbina-github-runner /docker/ui/Dockerfile into the build context."
         required: false
         type: boolean
-        default: false
+        default: true
       IS_COPY_DOCKER_DIRECTORY:
         description: "Copy default docker/ helpers (entrypoint, cron, healthcheck, nginx conf) from /docker/ui/docker."
         required: false
         type: boolean
-        default: false
+        default: true
       RUNTIME_TARGET:
         description: "Dockerfile target stage to build. For the unified Dockerfile: 'nginx-runner' or 'node-runner'. Leave empty when the repo brings its own Dockerfile (build-push-action will build the last stage)."
         required: false
         type: string
-        default: ''
+        default: 'nginx-runner'
       IMAGE_TAG_ECR:
         description: "Secondary image tag (in addition to the git SHA)."
         required: false
