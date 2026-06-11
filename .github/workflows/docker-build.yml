@@ -20,7 +20,7 @@ on:
         description: "Dockerfile path"
         required: false
         type: string
-        default: '{context}/Dockerfile'
+        default: 'Dockerfile'
 
 jobs:
   api-multi-module-workflow:
