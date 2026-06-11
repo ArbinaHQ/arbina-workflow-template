@@ -16,6 +16,11 @@ on:
         required: false
         type: string
         default: '.'
+      FILE:
+        description: "Dockerfile path"
+        required: false
+        type: string
+        default: '{context}/Dockerfile'
 
 jobs:
   api-multi-module-workflow:
@@ -37,6 +42,7 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           context: ${{ inputs.CONTEXT }}
+          file: ${{ inputs.FILE }}
           push: true
           tags: |
             ${{ secrets.ARBINA_K8S_ECR_REGISTRY }}/prod/${{ inputs.ECR_REPOSITORY }}:${{ github.sha }}
