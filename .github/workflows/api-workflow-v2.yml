@@ -91,7 +91,7 @@ jobs:
 
       - name: Copy dockerfile
         if: ${{ inputs.IS_COPY_DOCKERFILE }}
-        run: cp /docker/api/Dockerfile ./
+        run: cp /docker/api-v2/Dockerfile ./
         working-directory: ${{ inputs.MODULE_NAME }}
 
       - name: Login to ECR
