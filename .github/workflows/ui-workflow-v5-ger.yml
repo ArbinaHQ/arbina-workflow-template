@@ -1,0 +1,156 @@
+name: Reusable workflow v5-ger. Build & push UI image
+#
+# v5 changes vs v4:
+#   * Standardized Dockerfile lives in arbina-github-runner at /docker/ui/Dockerfile.
+#     Repos no longer need to maintain their own — opt in via IS_COPY_DOCKERFILE=true.
+#   * Standard nginx/cron healthcheck assets in /docker/ui/docker (entrypoint.sh,
+#     healthcheck.sh, cron, docker-nginx.conf) — copied via IS_COPY_DOCKER_DIRECTORY=true,
+#     mirroring the api-workflow.yml pattern.
+#   * New RUNTIME_TARGET input selects which final stage to build:
+#       - nginx-runner  → static SPA (CRA/Vite/Webpack) served by nginx       [default]
+#       - node-runner   → Next.js standalone server
+#   * New BUILD_DIR / WEB_ROOT / NGINX_CONF_SRC / BUILDER_NODE_OPTIONS build-args
+#     surface the per-app variations the unified Dockerfile parameterizes.
+#
+# Everything else (BuildKit npmrc secret, no GHA cache, ECR push) is unchanged from v4.
+#
+# Required org secrets:
+#   GITEA_TOKEN_RO_PACKAGES       — ci-bot PAT, scope read:package; for `npm ci` in Dockerfile.
+#   ARBINA_K8S_ECR_REGISTRY       — ECR host (e.g. registry.k8s.arbina.com).
+#   ARBINA_ECR_USERNAME, ARBINA_ECR_PASSWORD — ECR credentials.
+
+on:
+  workflow_call:
+    inputs:
+      MODULE_NAME:
+        description: "Monorepo subdirectory to use as Docker build context. Default '.'."
+        required: false
+        type: string
+        default: .
+      ECR_REPOSITORY:
+        description: "Image repository path inside ECR (without registry host)."
+        required: true
+        type: string
+      GIT_REVISION_ENV_NAME:
+        description: "Name of the .env variable for the git SHA. Default 'GIT_REVISION'."
+        required: false
+        type: string
+        default: GIT_REVISION
+      IS_ECR_PUSH_ENABLED:
+        description: "Push the built image to ECR. Set false to dry-build only."
+        required: true
+        type: boolean
+      IS_BUILD_ENABLED:
+        description: "If false, the whole job is skipped (kill-switch)."
+        required: false
+        type: boolean
+        default: true
+      IS_COPY_DOCKERFILE:
+        description: "Copy unified Dockerfile from arbina-github-runner /docker/ui/Dockerfile into the build context."
+        required: false
+        type: boolean
+        default: true
+      IS_COPY_DOCKER_DIRECTORY:
+        description: "Copy default docker/ helpers (entrypoint, cron, healthcheck, nginx conf) from /docker/ui/docker."
+        required: false
+        type: boolean
+        default: true
+      RUNTIME_TARGET:
+        description: "Dockerfile target stage to build. For the unified Dockerfile: 'nginx-runner' or 'node-runner'. Leave empty when the repo brings its own Dockerfile (build-push-action will build the last stage)."
+        required: false
+        type: string
+        default: 'nginx-runner'
+      IMAGE_TAG_ECR:
+        description: "Secondary image tag (in addition to the git SHA)."
+        required: false
+        type: string
+        default: latest
+      NODE_IMAGE:
+        description: "Node base image used by the Dockerfile (build-arg). Default node:24-alpine."
+        required: false
+        type: string
+        default: node:24-alpine
+      NODE_VERSION:
+        description: "Node major version installed on the runner via actions/setup-node. .nvmrc in the repo wins if present. Note: the Dockerfile picks its own Node base image independently."
+        required: false
+        type: string
+        default: '24'
+      BUILD_DIR:
+        description: "[nginx-runner] Build output directory inside /app the Dockerfile copies to nginx. Default 'build' (CRA). Use 'dist' for Vite, 'public' for some webpack setups."
+        required: false
+        type: string
+        default: build
+      WEB_ROOT:
+        description: "[nginx-runner] Document root inside the image. Default /var/www/arbina-ui (matches default docker-nginx.conf)."
+        required: false
+        type: string
+        default: /var/www/arbina-ui
+      NGINX_CONF_SRC:
+        description: "[nginx-runner] Path to nginx server conf inside the build context. Default 'docker/docker-nginx.conf'."
+        required: false
+        type: string
+        default: docker/docker-nginx.conf
+      BUILDER_NODE_OPTIONS:
+        description: "Extra NODE_OPTIONS for `npm run build` in the builder stage (e.g. '--openssl-legacy-provider' for old CRA)."
+        required: false
+        type: string
+        default: ''
+
+jobs:
+  ui-build-and-push-to-ecr:
+    if: ${{ inputs.IS_BUILD_ENABLED }}
+    runs-on: k8s-scale-runners-ger
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+
+      # setup-node only puts a Node binary on the runner for potential lint/test side
+      # steps callers may add later. The actual `npm ci` happens inside Docker, not here.
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ inputs.NODE_VERSION }}
+
+      - name: Stamp git revision into .env
+        run: echo "${{ inputs.GIT_REVISION_ENV_NAME }}=${{ github.sha }}" >> .env
+        working-directory: ${{ inputs.MODULE_NAME }}
+
+      - name: Copy docker directory
+        if: ${{ inputs.IS_COPY_DOCKER_DIRECTORY }}
+        run: cp -rn /docker/ui/docker ./
+        working-directory: ${{ inputs.MODULE_NAME }}
+
+      - name: Copy dockerfile
+        if: ${{ inputs.IS_COPY_DOCKERFILE }}
+        run: cp /docker/ui/Dockerfile ./
+        working-directory: ${{ inputs.MODULE_NAME }}
+
+      - name: Login to ECR
+        if: ${{ inputs.IS_ECR_PUSH_ENABLED }}
+        uses: docker/login-action@v3
+        with:
+          registry: https://${{ secrets.ARBINA_K8S_ECR_REGISTRY }}
+          username: ${{ secrets.ARBINA_ECR_USERNAME }}
+          password: ${{ secrets.ARBINA_ECR_PASSWORD }}
+
+      - name: Build and (optionally) push image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ inputs.MODULE_NAME }}
+          push: ${{ inputs.IS_ECR_PUSH_ENABLED }}
+          target: ${{ inputs.RUNTIME_TARGET }}
+          tags: |
+            ${{ secrets.ARBINA_K8S_ECR_REGISTRY }}/prod/${{ inputs.ECR_REPOSITORY }}:${{ github.sha }}
+            ${{ secrets.ARBINA_K8S_ECR_REGISTRY }}/prod/${{ inputs.ECR_REPOSITORY }}:${{ inputs.IMAGE_TAG_ECR }}
+          build-args: |
+            IMAGE_TAG=${{ github.sha }}
+            NODE_IMAGE=${{ inputs.NODE_IMAGE }}
+            BUILD_DIR=${{ inputs.BUILD_DIR }}
+            WEB_ROOT=${{ inputs.WEB_ROOT }}
+            NGINX_CONF_SRC=${{ inputs.NGINX_CONF_SRC }}
+            BUILDER_NODE_OPTIONS=${{ inputs.BUILDER_NODE_OPTIONS }}
+          secrets: |
+            GITEA_TOKEN=${{ secrets.GITEA_TOKEN_RO_PACKAGES || secrets.GITEA_TOKEN_CAN_READ_PACKAGES }}
+          # BuildKit secret — available as /run/secrets/GITEA_TOKEN inside RUN steps
+          # that opt into it via `--mount=type=secret,id=GITEA_TOKEN`.
+          # Crucially: the secret is NOT baked into any layer.
