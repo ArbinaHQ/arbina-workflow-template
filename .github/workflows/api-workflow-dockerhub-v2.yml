@@ -86,8 +86,16 @@ jobs:
         working-directory: ${{ inputs.MODULE_NAME }}
 
       - name: Set up Docker Buildx
-        if: ${{ inputs.IS_ECR_PUSH_ENABLED }}
+        if: ${{ inputs.IS_DOCKERHUB_PUSH_ENABLED }}
         uses: docker/setup-buildx-action@v4
+
+      - name: Login to ECR (pull internal base images)
+        if: ${{ inputs.IS_DOCKERHUB_PUSH_ENABLED }}
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ secrets.ARBINA_K8S_ECR_REGISTRY }}
+          username: ${{ secrets.ARBINA_ECR_USERNAME }}
+          password: ${{ secrets.ARBINA_ECR_PASSWORD }}
 
       - name: Login to DockerHub
         if: ${{ inputs.IS_DOCKERHUB_PUSH_ENABLED }}
@@ -118,5 +126,6 @@ jobs:
             IMAGE_TAG=${{ github.sha }}
             JAVA_VERSION=${{ inputs.JAVA_VERSION }}
             BOOT_JAR_NAME=${{ inputs.BOOT_JAR_NAME }}
+            ECR_REGISTRY=${{ secrets.ARBINA_K8S_ECR_REGISTRY }}/prod
           cache-from: type=gha
           cache-to: type=gha,mode=max
