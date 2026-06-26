@@ -37,7 +37,7 @@ jobs:
   ui-build-and-push-to-ecr:
     runs-on: custom
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
 
       - name: Login to ECR
         if: ${{ inputs.IS_ECR_PUSH_ENABLED }}

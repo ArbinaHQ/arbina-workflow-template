@@ -18,7 +18,7 @@ jobs:
   api-test-module-workflow:
     runs-on: k8s-scale-runners
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 1
 
