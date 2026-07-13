@@ -24,7 +24,7 @@ on:
 
 jobs:
   api-multi-module-workflow:
-    runs-on: k8s-scale-runners
+    runs-on: k8s-scale-runners-ger
     steps:
       - uses: actions/checkout@v6
 
