@@ -1,0 +1,49 @@
+name: Reusable workflow. Using to build, test and push API
+
+on:
+  workflow_call:
+    inputs:
+      ECR_REPOSITORY:
+        description: "Using for deploy docker image to ECR"
+        required: true
+        type: string
+      IS_ECR_PUSH_ENABLED:
+        description: "Using for disable pushing to ECR if value is true."
+        required: true
+        type: boolean
+      CONTEXT:
+        description: "Docker build context relative to repo root. Defaults to repo root."
+        required: false
+        type: string
+        default: '.'
+      FILE:
+        description: "Dockerfile path"
+        required: false
+        type: string
+        default: 'Dockerfile'
+
+jobs:
+  api-multi-module-workflow:
+    runs-on: k8s-scale-runners-ger
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Login to ECR
+        if: ${{ inputs.IS_ECR_PUSH_ENABLED }}
+        id: login-ecr
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ secrets.ARBINA_K8S_ECR_REGISTRY }}
+          username: ${{ secrets.ARBINA_ECR_USERNAME }}
+          password: ${{ secrets.ARBINA_ECR_PASSWORD }}
+
+      - name: Build, tag, and push image to ECR
+        if:  ${{ inputs.IS_ECR_PUSH_ENABLED }}
+        uses: docker/build-push-action@v7
+        with:
+          context: ${{ inputs.CONTEXT }}
+          file: ${{ inputs.FILE }}
+          push: true
+          tags: |
+            ${{ secrets.ARBINA_K8S_ECR_REGISTRY }}/prod/${{ inputs.ECR_REPOSITORY }}:${{ github.sha }}
+            ${{ secrets.ARBINA_K8S_ECR_REGISTRY }}/prod/${{ inputs.ECR_REPOSITORY }}:latest
