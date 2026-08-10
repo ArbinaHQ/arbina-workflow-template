@@ -1,0 +1,118 @@
+name: Reusable workflow. Using to build and publish npm lib package to Gitea
+#
+# npm counterpart of api-publish-lib-workflow.yml (which publishes Maven artifacts).
+# Intended to be called from a release-triggered workflow in the library repo.
+#
+# Required org secrets:
+#   GITEA_TOKEN_RW_PACKAGES_AND_REPO — ci-bot PAT, scope write:package; used both for
+#                                      `npm publish` and for installing @arbinahq deps.
+#
+# Auth is configured per host (//gitea.arbina.com/:_authToken), not per registry path,
+# so a repo .npmrc that maps @arbinahq to Gitea keeps working during install while the
+# default registry stays registry.npmjs.org.
+
+on:
+  workflow_call:
+    inputs:
+      NODE_VERSION:
+        description: "Using for set version Node.js in build"
+        default: "20"
+        required: false
+        type: string
+      WORKSPACE:
+        description: "npm workspace name to publish, e.g. '@arbinahq/infra-core'.
+                        If not present - the package in the repository root is published"
+        default: ""
+        required: false
+        type: string
+      PACKAGE_PATH:
+        description: "Directory holding the package.json being published.
+                        Used to check its version against the release tag"
+        default: .
+        required: false
+        type: string
+      INSTALL_COMMAND:
+        description: "Command installing dependencies before build"
+        default: npm ci
+        required: false
+        type: string
+      BUILD_COMMAND:
+        description: "Command building the package before publish"
+        default: npm run build
+        required: false
+        type: string
+      IS_TEST_ENABLED:
+        description: "Using for start test before pushing if value is true."
+        default: false
+        required: false
+        type: boolean
+      TEST_COMMAND:
+        description: "Command running tests when IS_TEST_ENABLED is true"
+        default: npm test
+        required: false
+        type: string
+      IS_VERSION_CHECK_ENABLED:
+        description: "Fail when package.json version differs from the release tag (v-prefix optional)."
+        default: true
+        required: false
+        type: boolean
+      REGISTRY_URL:
+        description: "npm registry the package is published to"
+        default: https://gitea.arbina.com/api/packages/ArbinaHQ-private/npm/
+        required: false
+        type: string
+
+jobs:
+  ui-lib-publish:
+    runs-on: k8s-scale-runners
+    # Exported for the whole job: repo .npmrc files use `//gitea.arbina.com/:_authToken=${GITEA_TOKEN}`
+    # and npm expands that at install time, not just at publish time.
+    env:
+      GITEA_TOKEN: ${{ secrets.GITEA_TOKEN_RW_PACKAGES_AND_REPO }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Set up Node.js ${{ inputs.NODE_VERSION }}
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ inputs.NODE_VERSION }}
+          cache: npm
+
+      # Covers repos that have no .npmrc of their own — the token is written to the user
+      # config keyed by host, so both `npm ci` and `npm publish` pick it up.
+      - name: Configure registry auth
+        shell: bash
+        env:
+          REGISTRY_URL: ${{ inputs.REGISTRY_URL }}
+        run: |
+          registry_host="$(node -p "new URL(process.env.REGISTRY_URL).host")"
+          npm config set "//${registry_host}/:_authToken=${GITEA_TOKEN}"
+
+      - name: Install dependencies
+        run: ${{ inputs.INSTALL_COMMAND }}
+
+      - name: Verify package version
+        if: inputs.IS_VERSION_CHECK_ENABLED && (github.event_name == 'release' || github.ref_type == 'tag')
+        shell: bash
+        env:
+          PACKAGE_PATH: ${{ inputs.PACKAGE_PATH }}
+          TAG_NAME: ${{ github.event.release.tag_name || github.ref_name }}
+        run: |
+          package_version="$(node -p "require('./' + process.env.PACKAGE_PATH + '/package.json').version")"
+          tag_version="${TAG_NAME#v}"
+          if [ "$package_version" != "$tag_version" ]; then
+            echo "::error::package.json version ($package_version) does not match release tag ($TAG_NAME)"
+            exit 1
+          fi
+
+      - name: Test package
+        if: inputs.IS_TEST_ENABLED
+        run: ${{ inputs.TEST_COMMAND }}
+
+      - name: Build package
+        run: ${{ inputs.BUILD_COMMAND }}
+
+      - name: Publish package
+        run: npm publish ${{ inputs.WORKSPACE && format('--workspace {0}', inputs.WORKSPACE) || '' }} --registry=${{ inputs.REGISTRY_URL }}
