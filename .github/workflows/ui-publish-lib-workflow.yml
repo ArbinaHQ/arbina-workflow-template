@@ -7,9 +7,8 @@ name: Reusable workflow. Using to build and publish npm lib package to Gitea
 #   GITEA_TOKEN_RW_PACKAGES_AND_REPO — ci-bot PAT, scope write:package; used both for
 #                                      `npm publish` and for installing @arbinahq deps.
 #
-# Auth is configured per host (//gitea.arbina.com/:_authToken), not per registry path,
-# so a repo .npmrc that maps @arbinahq to Gitea keeps working during install while the
-# default registry stays registry.npmjs.org.
+# Auth is written to the npm config instead of `setup-node`'s registry-url, so the default
+# registry stays registry.npmjs.org and a repo .npmrc mapping @arbinahq to Gitea keeps working.
 
 on:
   workflow_call:
@@ -80,15 +79,21 @@ jobs:
           node-version: ${{ inputs.NODE_VERSION }}
           cache: npm
 
-      # Covers repos that have no .npmrc of their own — the token is written to the user
-      # config keyed by host, so both `npm ci` and `npm publish` pick it up.
+      # Two keys, because npm resolves auth differently per command:
+      #   * `npm ci`      — npm-registry-fetch walks the path up to //host/, so the host key is enough.
+      #   * `npm publish` — config.getCredentialsByURI() matches the registry's nerf dart exactly,
+      #                     so a host-only key gives ENEEDAUTH. Hence the full-path key as well.
       - name: Configure registry auth
         shell: bash
         env:
           REGISTRY_URL: ${{ inputs.REGISTRY_URL }}
         run: |
           registry_host="$(node -p "new URL(process.env.REGISTRY_URL).host")"
+          registry_key="$(node -p "const u = new URL(process.env.REGISTRY_URL);
+                                   const r = new URL('.', u.protocol + '//' + u.host + u.pathname);
+                                   '//' + r.host + r.pathname")"
           npm config set "//${registry_host}/:_authToken=${GITEA_TOKEN}"
+          npm config set "${registry_key}:_authToken=${GITEA_TOKEN}"
 
       - name: Install dependencies
         run: ${{ inputs.INSTALL_COMMAND }}
