@@ -48,7 +48,7 @@ jobs:
     runs-on: k8s-scale-runners
     timeout-minutes: 30
     concurrency:
-      group: build-${{ github.repository }}-${{ github.ref }}-${{ inputs.MODULE_NAME }}
+      group: build-${{ github.repository }}-${{ github.workflow }}-${{ github.ref }}-${{ inputs.MODULE_NAME }}
       cancel-in-progress: true
 
     env:
