@@ -26,7 +26,7 @@ jobs:
   api-multi-module-workflow:
     runs-on: k8s-scale-runners-ger
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Login to ECR
         if: ${{ inputs.IS_ECR_PUSH_ENABLED }}
