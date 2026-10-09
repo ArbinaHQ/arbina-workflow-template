@@ -127,5 +127,6 @@ jobs:
             JAVA_VERSION=${{ inputs.JAVA_VERSION }}
             BOOT_JAR_NAME=${{ inputs.BOOT_JAR_NAME }}
             ECR_REGISTRY=${{ secrets.ARBINA_K8S_ECR_REGISTRY }}/prod
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # Layer cache in Harbor (build-cache project), one per image; a cache failure does not fail the build
+          cache-from: type=registry,ref=${{ secrets.ARBINA_K8S_ECR_REGISTRY }}/build-cache/${{ inputs.DOCKERHUB_REPOSITORY }}:buildcache
+          cache-to: type=registry,ref=${{ secrets.ARBINA_K8S_ECR_REGISTRY }}/build-cache/${{ inputs.DOCKERHUB_REPOSITORY }}:buildcache,mode=max,image-manifest=true,oci-mediatypes=true,ignore-error=true
