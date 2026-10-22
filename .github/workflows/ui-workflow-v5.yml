@@ -107,7 +107,7 @@ jobs:
 
       # setup-node only puts a Node binary on the runner for potential lint/test side
       # steps callers may add later. The actual `npm ci` happens inside Docker, not here.
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ inputs.NODE_VERSION }}
 
@@ -127,14 +127,14 @@ jobs:
 
       - name: Login to ECR
         if: ${{ inputs.IS_ECR_PUSH_ENABLED }}
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: https://${{ secrets.ARBINA_K8S_ECR_REGISTRY }}
           username: ${{ secrets.ARBINA_ECR_USERNAME }}
           password: ${{ secrets.ARBINA_ECR_PASSWORD }}
 
       - name: Build and (optionally) push image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ${{ inputs.MODULE_NAME }}
           push: ${{ inputs.IS_ECR_PUSH_ENABLED }}
