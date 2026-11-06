@@ -88,4 +88,3 @@ jobs:
             ${{ secrets.ARBINA_K8S_ECR_REGISTRY }}/prod/${{ inputs.ECR_REPOSITORY }}:${{ inputs.IMAGE_TAG_ECR }}
           build-args: |
             IMAGE_TAG=${{ github.sha }}
-            NODE_AUTH_TOKEN=${{ secrets.GH_TOKEN_CAN_READ_PACKAGES }}
