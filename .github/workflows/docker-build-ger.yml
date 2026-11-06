@@ -17,10 +17,10 @@ on:
         type: string
         default: '.'
       FILE:
-        description: "Dockerfile path"
+        description: "Dockerfile path relative to repo root. Defaults to Dockerfile inside CONTEXT."
         required: false
         type: string
-        default: 'Dockerfile'
+        default: ''
 
 jobs:
   api-multi-module-workflow:
